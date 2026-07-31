@@ -1,77 +1,1733 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namaste Indian Cuisine</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Night — Six Games, One Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #1b4332;
+    --felt-light: #234d3c;
+    --wood: #2e211b;
+    --wood-light: #3e2c23;
+    --cream: #f5efe0;
+    --cream-dim: #e9e0c9;
+    --brass: #c9a227;
+    --brass-light: #e0bf4f;
+    --dice-red: #a63446;
+    --dice-red-dark: #7f2334;
+    --ink: #211a14;
+    --paper-shadow: 0 10px 24px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Space Grotesk', sans-serif;
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(255,255,255,.05), transparent 40%),
+      repeating-linear-gradient(115deg, var(--wood) 0px, var(--wood) 2px, var(--wood-light) 2px, var(--wood-light) 4px),
+      var(--wood);
+    color: var(--cream);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; }
+  ::selection{ background:var(--brass); color:var(--ink); }
+  a{color:inherit;}
+  button{ font-family:inherit; cursor:pointer; }
+  :focus-visible{ outline:3px solid var(--brass-light); outline-offset:2px; }
+
+  /* ---------- top scoreboard strip ---------- */
+  .scoreboard{
+    background: linear-gradient(180deg, #14251c, #0f1c15);
+    border-bottom: 6px solid var(--brass);
+    padding: 14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+  }
+  .scoreboard .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .scoreboard .brand .pin{
+    width:10px;height:10px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass) 60%, #8a6c14);
+    box-shadow:0 2px 3px rgba(0,0,0,.5);
+    display:inline-block;
+  }
+  .scoreboard h1{
+    font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+    color: var(--cream);
+    letter-spacing:.02em;
+  }
+  .scoreboard .tally{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.78rem;
+    color: var(--cream-dim);
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .scoreboard .tally span b{ color:var(--brass-light); font-weight:600; }
+  .back-btn{
+    display:none;
+    align-items:center;
+    gap:8px;
+    background: var(--dice-red);
+    color: var(--cream);
+    border:none;
+    padding:9px 16px;
+    border-radius:100px;
+    font-weight:600;
+    font-size:.85rem;
+    box-shadow: 0 3px 0 var(--dice-red-dark);
+    transition: transform .12s ease;
+  }
+  .back-btn:hover{ transform: translateY(-1px); }
+  .back-btn:active{ transform: translateY(2px); box-shadow:0 1px 0 var(--dice-red-dark); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    max-width:880px;
+    margin: 48px auto 8px;
+    padding: 0 24px;
+    text-align:center;
+  }
+  .hero .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing:.22em;
+    font-size:.72rem;
+    color: var(--brass-light);
+    margin-bottom:14px;
+    display:block;
+  }
+  .hero h2{
+    font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+    line-height:1.05;
+    color: var(--cream);
+    font-weight:600;
+  }
+  .hero h2 em{
+    font-style:italic;
+    color: var(--brass-light);
+    font-weight:500;
+  }
+  .hero p{
+    max-width:520px;
+    margin:16px auto 0;
+    color: var(--cream-dim);
+    font-size:1.02rem;
+    line-height:1.55;
+  }
+
+  /* ---------- corkboard game grid ---------- */
+  .board{
+    max-width:1180px;
+    margin: 40px auto 80px;
+    padding: 40px clamp(16px,4vw,40px);
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 34px 28px;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255,255,255,.04), transparent 30%),
+      repeating-radial-gradient(circle at center, rgba(0,0,0,.05) 0, rgba(0,0,0,.05) 1px, transparent 1px, transparent 3px),
+      var(--felt);
+    border-radius: 18px;
+    box-shadow: inset 0 0 0 10px var(--wood-light), inset 0 0 40px rgba(0,0,0,.5), var(--paper-shadow);
+  }
+  .card{
+    background: var(--cream);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 22px 20px 24px;
+    position:relative;
+    box-shadow: var(--paper-shadow);
+    transform: rotate(var(--tilt));
+    transition: transform .18s ease, box-shadow .18s ease;
+    border:none;
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:190px;
+  }
+  .card:nth-child(1){ --tilt:-2deg; }
+  .card:nth-child(2){ --tilt:1.4deg; }
+  .card:nth-child(3){ --tilt:-1deg; }
+  .card:nth-child(4){ --tilt:2deg; }
+  .card:nth-child(5){ --tilt:-1.6deg; }
+  .card:nth-child(6){ --tilt:1deg; }
+  .card:hover{ transform: rotate(0deg) translateY(-6px); box-shadow: 0 18px 30px rgba(0,0,0,.4); }
+  .card .pin{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    width:16px;height:16px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass) 55%, #8a6c14);
+    box-shadow:0 3px 4px rgba(0,0,0,.5);
+  }
+  .card .glyph{
+    font-size:2.1rem;
+    line-height:1;
+  }
+  .card h3{ font-size:1.28rem; color:var(--wood); }
+  .card p{
+    margin:0;
+    font-size:.86rem;
+    color:#5a5044;
+    line-height:1.45;
+    flex-grow:1;
+  }
+  .card .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.68rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color: var(--dice-red-dark);
+    font-weight:600;
+  }
+
+  /* ---------- game view shell ---------- */
+  .game-view{
+    max-width: 900px;
+    margin: 30px auto 90px;
+    padding: 0 20px;
+  }
+  .game-view[hidden]{ display:none; }
+  .game-card{
+    background: var(--cream);
+    color: var(--ink);
+    border-radius: 14px;
+    padding: 28px clamp(16px,4vw,40px) 36px;
+    box-shadow: var(--paper-shadow);
+  }
+  .game-card h2{
+    color: var(--wood);
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .game-card .sub{
+    color:#6b5f4f;
+    font-size:.92rem;
+    margin-top:6px;
+    margin-bottom:22px;
+  }
+  .controls-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .btn{
+    background: var(--felt);
+    color: var(--cream);
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:.86rem;
+    box-shadow: 0 3px 0 #0f2a20;
+    transition: transform .1s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #0f2a20; }
+  .btn.secondary{
+    background: transparent;
+    color: var(--wood);
+    box-shadow:none;
+    border: 2px solid var(--wood);
+  }
+  .btn.brass{
+    background: var(--brass);
+    color: var(--ink);
+    box-shadow: 0 3px 0 #8a6c14;
+  }
+  .stat-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.82rem;
+    color:#6b5f4f;
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom: 18px;
+  }
+  .stat-line b{ color:var(--wood); }
+
+  /* ---------- tic tac toe ---------- */
+  #ttt-board{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:8px;
+    max-width:320px;
+    margin: 0 auto;
+  }
+  #ttt-board button{
+    aspect-ratio:1;
+    background: var(--felt-light);
+    border:none;
+    border-radius:10px;
+    font-size:2.4rem;
+    font-family:'Fraunces', serif;
+    color: var(--cream);
+    box-shadow: inset 0 0 0 3px rgba(0,0,0,.15);
+  }
+  #ttt-board button:not(:disabled):hover{ background:#2c5e48; }
+  #ttt-board button:disabled{ cursor:default; }
+  #ttt-msg{ text-align:center; margin-top:16px; font-weight:600; color:var(--wood); min-height:1.4em; }
+
+  /* ---------- memory match ---------- */
+  #mem-board{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+    max-width:420px;
+    margin:0 auto;
+  }
+  .mem-card{
+    aspect-ratio: 1;
+    perspective: 600px;
+  }
+  .mem-card .inner{
+    all: unset;
+    position:relative;
+    display:block;
+    width:100%; height:100%;
+    cursor:pointer;
+    transition: transform .4s;
+    transform-style: preserve-3d;
+  }
+  .mem-card.flipped .inner, .mem-card.matched .inner{ transform: rotateY(180deg); }
+  .mem-face{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:8px;
+    backface-visibility:hidden;
+    font-size:1.8rem;
+  }
+  .mem-face.back{
+    background: var(--felt);
+    color: var(--brass-light);
+    font-family:'Fraunces', serif;
+    font-size:1.4rem;
+    background-image: radial-gradient(circle, rgba(245,239,224,.08) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+  .mem-face.front{
+    background: var(--tile-bg, var(--cream-dim));
+    transform: rotateY(180deg);
+    box-shadow: inset 0 0 0 2px var(--brass);
+    font-size: 2.4rem;
+  }
+  .mem-card.matched .mem-face.front{ box-shadow: inset 0 0 0 2px #4caf50; opacity:.75; }
+
+  /* ---------- snake ---------- */
+  #snake-wrap{ display:flex; justify-content:center; }
+  #snake-canvas{
+    background: var(--felt);
+    border-radius:10px;
+    box-shadow: inset 0 0 0 4px var(--wood-light);
+    max-width:100%;
+    touch-action:none;
+  }
+  .dpad{
+    display:grid;
+    grid-template-columns: repeat(3, 48px);
+    grid-template-rows: repeat(3, 48px);
+    gap:6px;
+    justify-content:center;
+    margin: 18px auto 0;
+  }
+  .dpad button{
+    background:var(--felt); color:var(--cream); border:none; border-radius:8px; font-size:1.1rem;
+  }
+  .dpad button:active{ background:var(--felt-light); }
+  #dpad-up{grid-column:2; grid-row:1;}
+  #dpad-left{grid-column:1; grid-row:2;}
+  #dpad-right{grid-column:3; grid-row:2;}
+  #dpad-down{grid-column:2; grid-row:3;}
+
+  /* ---------- 2048 ---------- */
+  #g2048-board{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+    max-width:380px;
+    margin:0 auto;
+    background: var(--wood-light);
+    padding:10px;
+    border-radius:10px;
+    touch-action:none;
+  }
+  .tile2048{
+    aspect-ratio:1;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:1.4rem;
+    background: rgba(245,239,224,.12);
+    color: transparent;
+    transition: background .15s ease;
+  }
+  .t-2{ background:#eee4da; color:#5a4c3f; }
+  .t-4{ background:#ede0c8; color:#5a4c3f; }
+  .t-8{ background:#f2b179; color:#fff; }
+  .t-16{ background:#f59563; color:#fff; }
+  .t-32{ background:#f67c5f; color:#fff; }
+  .t-64{ background:#f65e3b; color:#fff; }
+  .t-128{ background:#edcf72; color:#fff; font-size:1.2rem;}
+  .t-256{ background:#edcc61; color:#fff; font-size:1.2rem;}
+  .t-512{ background:#edc850; color:#fff; font-size:1.2rem;}
+  .t-1024{ background:#edc53f; color:#fff; font-size:1rem;}
+  .t-2048{ background:var(--brass); color:#fff; font-size:1rem;}
+
+  /* ---------- rps ---------- */
+  .rps-choices{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin: 10px 0 22px;}
+  .rps-choices button{
+    background: var(--felt);
+    color: var(--cream);
+    border:none;
+    border-radius:14px;
+    width:96px; height:96px;
+    font-size:2.2rem;
+    box-shadow: 0 4px 0 #0f2a20;
+  }
+  .rps-choices button:hover{ background:var(--felt-light); }
+  .rps-choices button:active{ transform:translateY(3px); box-shadow:0 1px 0 #0f2a20;}
+  .rps-arena{
+    display:flex; align-items:center; justify-content:center; gap:30px;
+    font-size:3rem; margin-bottom:14px; min-height:70px;
+  }
+  .rps-arena .vs{ font-family:'IBM Plex Mono', monospace; font-size:1rem; color:#6b5f4f; }
+  #rps-result{ text-align:center; font-weight:600; color:var(--wood); min-height:1.4em; }
+
+  /* ---------- whack a mole ---------- */
+  #whack-board{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:14px;
+    max-width:380px;
+    margin:0 auto;
+  }
+  .hole{
+    aspect-ratio:1;
+    border-radius:50%;
+    background: radial-gradient(circle at 50% 40%, #3a2a1f, #1c130d 70%);
+    box-shadow: inset 0 6px 10px rgba(0,0,0,.6);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    position:relative;
+  }
+  .hole button{
+    all:unset;
+    width:70%; height:70%;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.8rem;
+    background: var(--brass);
+    transform: translateY(120%);
+    transition: transform .12s ease-out;
+    cursor:pointer;
+  }
+  .hole.up button{ transform: translateY(0%); }
+  .hole.whacked button{ background: var(--dice-red); }
+
+  /* ---------- connect four ---------- */
+  #c4-board{
+    display:grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--felt);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 4px var(--wood-light);
+  }
+  .c4-col{
+    display:flex;
+    flex-direction:column-reverse;
+    gap:6px;
+    cursor:pointer;
+    padding:2px;
+    border-radius:6px;
+  }
+  .c4-col:hover{ background: rgba(255,255,255,.06); }
+  .c4-cell{
+    aspect-ratio:1;
+    border-radius:50%;
+    background: rgba(0,0,0,.35);
+    box-shadow: inset 0 3px 5px rgba(0,0,0,.4);
+  }
+  .c4-cell.red{ background: radial-gradient(circle at 35% 30%, #ff8f7a, var(--dice-red) 65%); }
+  .c4-cell.yellow{ background: radial-gradient(circle at 35% 30%, #ffe58a, var(--brass) 65%); }
+  #c4-msg{ text-align:center; margin-top:16px; font-weight:600; color:var(--wood); min-height:1.4em; }
+
+  /* ---------- simon says ---------- */
+  #simon-board{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:12px;
+    max-width:320px;
+    margin: 0 auto;
+  }
+  .simon-pad{
+    aspect-ratio:1;
+    border:none;
+    border-radius:14px;
+    opacity:.55;
+    transition: opacity .1s ease, transform .1s ease;
+    box-shadow: 0 4px 0 rgba(0,0,0,.35);
+  }
+  .simon-pad:active{ transform: translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.35); }
+  .simon-pad.lit{ opacity:1; filter:brightness(1.3); }
+  .simon-pad.green{ background:#3ea36b; border-radius:14px 4px 4px 4px; }
+  .simon-pad.red{ background:#c0435a; border-radius:4px 14px 4px 4px; }
+  .simon-pad.yellow{ background:#d9b23c; border-radius:4px 4px 14px 4px; }
+  .simon-pad.blue{ background:#3b74b0; border-radius:4px 4px 4px 14px; }
+  #simon-msg{ text-align:center; margin-top:16px; font-weight:600; color:var(--wood); min-height:1.4em; }
+
+  /* ---------- breakout ---------- */
+  #breakout-wrap{ display:flex; justify-content:center; }
+  #breakout-canvas{
+    background: var(--felt);
+    border-radius:10px;
+    box-shadow: inset 0 0 0 4px var(--wood-light);
+    max-width:100%;
+    touch-action:none;
+  }
+  #breakout-msg{ text-align:center; margin-top:12px; color:#6b5f4f; font-size:.85rem; }
+
+  /* ---------- sliding puzzle ---------- */
+  #slide-board{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:8px;
+    max-width:340px;
+    margin:0 auto;
+    background: var(--wood-light);
+    padding:8px;
+    border-radius:10px;
+  }
+  .slide-tile{
+    aspect-ratio:1;
+    border:none;
+    border-radius:6px;
+    background: var(--brass);
+    color: var(--ink);
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:1.3rem;
+    box-shadow: 0 3px 0 #8a6c14;
+  }
+  .slide-tile.blank{ background:transparent; box-shadow:none; cursor:default; }
+  #slide-msg{ text-align:center; margin-top:16px; font-weight:600; color:var(--wood); min-height:1.4em; }
+
+  footer{
+    text-align:center;
+    padding: 26px;
+    color: var(--cream-dim);
+    font-size:.78rem;
+    font-family:'IBM Plex Mono', monospace;
+    opacity:.7;
+  }
+
+  @media (max-width:520px){
+    .scoreboard{ padding:12px 14px; }
+    .scoreboard .tally{ font-size:.7rem; gap:12px; }
+  }
+</style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Simple Restaurant</h1>
-            <nav>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#menu">Menu</a></li>
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
 
-    <section id="home">
-        <div class="hero">
-            <h2>Authentic Indian Flavors</h2>
-            <p>Experience the essence of India in every bite.</p>
-            <a href="#menu" class="btn">Explore Menu</a>
-        </div>
-    </section>
+<div class="scoreboard">
+  <div class="brand">
+    <span class="pin"></span>
+    <h1>Game Night</h1>
+  </div>
+  <button class="back-btn" id="backBtn">&larr; Back to the table</button>
+  <div class="tally" id="tally">
+    <span>Games played: <b id="tally-played">0</b></span>
+    <span>Wins: <b id="tally-wins">0</b></span>
+  </div>
+</div>
 
-    <section id="menu">
-        <h2>Our Menu</h2>
-        <div class="menu-items">
-            <div class="item">
-                <h3>Butter Chicken</h3>
-                <p>Delicious creamy curry with tender chicken pieces.</p>
-                <p class="price">₹350</p>
-            </div>
-            <div class="item">
-                <h3>Biryani</h3>
-                <p>Fragrant basmati rice cooked with spices and meat.</p>
-                <p class="price">₹250</p>
-            </div>
-            <div class="item">
-                <h3>Paneer Tikka</h3>
-                <p>Grilled cottage cheese cubes marinated in spices.</p>
-                <p class="price">₹300</p>
-            </div>
-            <div class="item">
-                <h3>Gulab Jamun</h3>
-                <p>Soft, spongy desserts soaked in sugar syrup.</p>
-                <p class="price">₹150</p>
-            </div>
-        </div>
-    </section>
+<section class="hero" id="homeHero">
+  <span class="eyebrow">Ten games · One table </span>
+  <h2>Pull up a chair for <em>game night.</em></h2>
+  <p>Pick a box off the shelf. Every game keeps score right here at the table — no accounts, no installs, just play.</p>
+</section>
 
-    <section id="about">
-        <h2>About Us</h2>
-        <p>Simple Restaurant is a family-owned restaurant bringing the rich culinary traditions of India to your table. From flavorful curries to aromatic rice dishes, our menu celebrates the diversity of Indian cuisine.</p>
-    </section>
+<main class="board" id="homeBoard">
+  <button class="card" data-game="ttt">
+    <span class="pin"></span>
+    <span class="glyph">✕⭕</span>
+    <h3>Tic&#8209;Tac&#8209;Toe</h3>
+    <p>The classic grid duel. Play a friend on the same table, or take on the house.</p>
+    <span class="tag">2 players · quick round</span>
+  </button>
 
-    <section id="contact">
-        <h2>Contact Us</h2>
-        <form>
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea placeholder="Your Message" required></textarea>
-            <button type="submit">Send Message</button>
-        </form>
-    </section>
+  <button class="card" data-game="mem">
+    <span class="pin"></span>
+    <span class="glyph">🃏</span>
+    <h3>Memory Match</h3>
+    <p>Flip two cards at a time and hunt for pairs. Fewer moves, better score.</p>
+    <span class="tag">Solo · brain warm&#8209;up</span>
+  </button>
 
-    <footer>
-        <p>&copy; 2025. All rights reserved.</p>
-    </footer>
+  <button class="card" data-game="snake">
+    <span class="pin"></span>
+    <span class="glyph">🐍</span>
+    <h3>Snake</h3>
+    <p>Steer around the felt, eat the dice, don't bite your own tail.</p>
+    <span class="tag">Solo · arrow keys</span>
+  </button>
+
+  <button class="card" data-game="g2048">
+    <span class="pin"></span>
+    <span class="glyph">🔢</span>
+    <h3>2048</h3>
+    <p>Slide the tiles, merge the numbers, chase the elusive 2048 tile.</p>
+    <span class="tag">Solo · puzzle</span>
+  </button>
+
+  <button class="card" data-game="rps">
+    <span class="pin"></span>
+    <span class="glyph">✊✋✌️</span>
+    <h3>Rock, Paper, Scissors</h3>
+    <p>Best of the classics. Throw your hand against the house dealer.</p>
+    <span class="tag">1 player vs house</span>
+  </button>
+
+  <button class="card" data-game="whack">
+    <span class="pin"></span>
+    <span class="glyph">🔨</span>
+    <h3>Whack&#8209;a&#8209;Mole</h3>
+    <p>30 seconds on the clock. Quick hands only — don't whack the empty hole.</p>
+    <span class="tag">Solo · reflexes</span>
+  </button>
+
+  <button class="card" data-game="c4">
+    <span class="pin"></span>
+    <span class="glyph">🔴🟡</span>
+    <h3>Connect Four</h3>
+    <p>Drop discs down the columns. First to line up four takes the table.</p>
+    <span class="tag">2 players · same screen</span>
+  </button>
+
+  <button class="card" data-game="simon">
+    <span class="pin"></span>
+    <span class="glyph">🟩🟥</span>
+    <h3>Simon Says</h3>
+    <p>Watch the pattern light up, then repeat it back. One slip ends the run.</p>
+    <span class="tag">Solo · memory</span>
+  </button>
+
+  <button class="card" data-game="breakout">
+    <span class="pin"></span>
+    <span class="glyph">🧱</span>
+    <h3>Breakout</h3>
+    <p>Steer the paddle, keep the ball alive, clear every brick on the wall.</p>
+    <span class="tag">Solo · arcade</span>
+  </button>
+
+  <button class="card" data-game="slide">
+    <span class="pin"></span>
+    <span class="glyph">🔲</span>
+    <h3>Sliding Puzzle</h3>
+    <p>Shuffle the fifteen tiles, then slide them back into perfect order.</p>
+    <span class="tag">Solo · puzzle</span>
+  </button>
+</main>
+
+<!-- ================= TIC TAC TOE ================= -->
+<section class="game-view" id="view-ttt" hidden>
+  <div class="game-card">
+    <h2>✕⭕ Tic-Tac-Toe</h2>
+    <p class="sub">X always opens. Toggle the house dealer on for a solo round.</p>
+    <div class="controls-row">
+      <button class="btn secondary" id="ttt-vs-cpu">Play vs house: OFF</button>
+      <button class="btn" id="ttt-reset">New round</button>
+    </div>
+    <div id="ttt-board"></div>
+    <div id="ttt-msg"></div>
+  </div>
+</section>
+
+<!-- ================= MEMORY MATCH ================= -->
+<section class="game-view" id="view-mem" hidden>
+  <div class="game-card">
+    <h2>🃏 Memory Match</h2>
+    <p class="sub">Flip two cards. Match all eight pairs in as few moves as possible.</p>
+    <div class="stat-line">
+      <span>Moves: <b id="mem-moves">0</b></span>
+      <span>Pairs found: <b id="mem-pairs">0</b> / 8</span>
+      <span>Time: <b id="mem-time">0s</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="mem-reset">Shuffle new deck</button>
+    </div>
+    <div id="mem-board"></div>
+  </div>
+</section>
+
+<!-- ================= SNAKE ================= -->
+<section class="game-view" id="view-snake" hidden>
+  <div class="game-card">
+    <h2>🐍 Snake</h2>
+    <p class="sub">Arrow keys or WASD to steer. On touch, use the pad below.</p>
+    <div class="stat-line">
+      <span>Score: <b id="snake-score">0</b></span>
+      <span>Best: <b id="snake-best">0</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="snake-reset">New game</button>
+    </div>
+    <div id="snake-wrap">
+      <canvas id="snake-canvas" width="360" height="360"></canvas>
+    </div>
+    <div class="dpad">
+      <button id="dpad-up">↑</button>
+      <button id="dpad-left">←</button>
+      <button id="dpad-right">→</button>
+      <button id="dpad-down">↓</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2048 ================= -->
+<section class="game-view" id="view-g2048" hidden>
+  <div class="game-card">
+    <h2>🔢 2048</h2>
+    <p class="sub">Arrow keys or swipe to slide every tile. Matching numbers merge.</p>
+    <div class="stat-line">
+      <span>Score: <b id="g2048-score">0</b></span>
+      <span>Best: <b id="g2048-best">0</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="g2048-reset">New game</button>
+    </div>
+    <div id="g2048-board"></div>
+    <div id="g2048-msg" style="text-align:center; margin-top:14px; font-weight:600; color:var(--wood); min-height:1.4em;"></div>
+  </div>
+</section>
+
+<!-- ================= RPS ================= -->
+<section class="game-view" id="view-rps" hidden>
+  <div class="game-card">
+    <h2>✊✋✌️ Rock, Paper, Scissors</h2>
+    <p class="sub">Throw your hand. First to feel lucky.</p>
+    <div class="stat-line">
+      <span>You: <b id="rps-wins">0</b></span>
+      <span>House: <b id="rps-losses">0</b></span>
+      <span>Ties: <b id="rps-ties">0</b></span>
+    </div>
+    <div class="rps-arena">
+      <span id="rps-you">🤷</span>
+      <span class="vs">VS</span>
+      <span id="rps-house">🤷</span>
+    </div>
+    <div id="rps-result"></div>
+    <div class="rps-choices">
+      <button data-choice="rock">✊</button>
+      <button data-choice="paper">✋</button>
+      <button data-choice="scissors">✌️</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHACK A MOLE ================= -->
+<section class="game-view" id="view-whack" hidden>
+  <div class="game-card">
+    <h2>🔨 Whack-a-Mole</h2>
+    <p class="sub">30 seconds. Click the mole the instant it pops up.</p>
+    <div class="stat-line">
+      <span>Score: <b id="whack-score">0</b></span>
+      <span>Time left: <b id="whack-time">30s</b></span>
+      <span>Best: <b id="whack-best">0</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="whack-start">Start round</button>
+    </div>
+    <div id="whack-board"></div>
+  </div>
+</section>
+
+<!-- ================= CONNECT FOUR ================= -->
+<section class="game-view" id="view-c4" hidden>
+  <div class="game-card">
+    <h2>🔴🟡 Connect Four</h2>
+    <p class="sub">Tap a column to drop your disc. Red opens the game.</p>
+    <div class="controls-row">
+      <button class="btn secondary" id="c4-vs-cpu">Play vs house: OFF</button>
+      <button class="btn" id="c4-reset">New game</button>
+    </div>
+    <div id="c4-board"></div>
+    <div id="c4-msg"></div>
+  </div>
+</section>
+
+<!-- ================= SIMON SAYS ================= -->
+<section class="game-view" id="view-simon" hidden>
+  <div class="game-card">
+    <h2>🟩🟥 Simon Says</h2>
+    <p class="sub">Watch the sequence, then tap the pads back in the same order.</p>
+    <div class="stat-line">
+      <span>Round: <b id="simon-round">0</b></span>
+      <span>Best: <b id="simon-best">0</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="simon-start">Start</button>
+    </div>
+    <div id="simon-board">
+      <button class="simon-pad green" data-pad="0"></button>
+      <button class="simon-pad red" data-pad="1"></button>
+      <button class="simon-pad yellow" data-pad="2"></button>
+      <button class="simon-pad blue" data-pad="3"></button>
+    </div>
+    <div id="simon-msg"></div>
+  </div>
+</section>
+
+<!-- ================= BREAKOUT ================= -->
+<section class="game-view" id="view-breakout" hidden>
+  <div class="game-card">
+    <h2>🧱 Breakout</h2>
+    <p class="sub">Drag with your mouse or finger to move the paddle. Arrow keys work too.</p>
+    <div class="stat-line">
+      <span>Score: <b id="breakout-score">0</b></span>
+      <span>Lives: <b id="breakout-lives">1</b></span>
+      <span>Best: <b id="breakout-best">0</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="breakout-reset">New game</button>
+    </div>
+    <div id="breakout-wrap">
+      <canvas id="breakout-canvas" width="360" height="420"></canvas>
+    </div>
+    <p id="breakout-msg">Drag anywhere on the board to steer the paddle.</p>
+  </div>
+</section>
+
+<!-- ================= SLIDING PUZZLE ================= -->
+<section class="game-view" id="view-slide" hidden>
+  <div class="game-card">
+    <h2>🔲 Sliding Puzzle</h2>
+    <p class="sub">Slide tiles into the empty slot until 1 through 15 line up in order.</p>
+    <div class="stat-line">
+      <span>Moves: <b id="slide-moves">0</b></span>
+      <span>Best: <b id="slide-best">—</b></span>
+    </div>
+    <div class="controls-row">
+      <button class="btn" id="slide-reset">Shuffle</button>
+    </div>
+    <div id="slide-board"></div>
+    <div id="slide-msg"></div>
+  </div>
+</section>
+
+<footer>Game Night © 2025 • Shashwat Saini — Built for one long evening at the table.</footer>
+
+<script>
+/* ============================================================
+   SHARED: navigation + scoreboard tally
+   ============================================================ */
+const homeHero = document.getElementById('homeHero');
+const homeBoard = document.getElementById('homeBoard');
+const backBtn = document.getElementById('backBtn');
+const views = {
+  ttt: document.getElementById('view-ttt'),
+  mem: document.getElementById('view-mem'),
+  snake: document.getElementById('view-snake'),
+  g2048: document.getElementById('view-g2048'),
+  rps: document.getElementById('view-rps'),
+  whack: document.getElementById('view-whack'),
+  c4: document.getElementById('view-c4'),
+  simon: document.getElementById('view-simon'),
+  breakout: document.getElementById('view-breakout'),
+  slide: document.getElementById('view-slide'),
+};
+let played = 0, wins = 0;
+const tallyPlayed = document.getElementById('tally-played');
+const tallyWins = document.getElementById('tally-wins');
+function recordRound(won){
+  played++;
+  if(won) wins++;
+  tallyPlayed.textContent = played;
+  tallyWins.textContent = wins;
+}
+
+let activeGame = null;
+function openGame(id){
+  homeHero.style.display = 'none';
+  homeBoard.style.display = 'none';
+  backBtn.style.display = 'inline-flex';
+  Object.values(views).forEach(v => v.hidden = true);
+  views[id].hidden = false;
+  activeGame = id;
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(id === 'snake' && !snakeStarted){ initSnake(); }
+  if(id === 'g2048' && !g2048Started){ initG2048(); }
+  if(id === 'breakout' && !breakoutStarted){ initBreakout(); }
+  if(id === 'slide' && !slideStarted){ initSlide(); }
+}
+function goHome(){
+  homeHero.style.display = '';
+  homeBoard.style.display = '';
+  backBtn.style.display = 'none';
+  Object.values(views).forEach(v => v.hidden = true);
+  activeGame = null;
+  clearInterval(whackTimerId);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.card').forEach(c=>{
+  c.addEventListener('click', ()=> openGame(c.dataset.game));
+});
+backBtn.addEventListener('click', goHome);
+
+/* ============================================================
+   TIC TAC TOE
+   ============================================================ */
+(function(){
+  const boardEl = document.getElementById('ttt-board');
+  const msgEl = document.getElementById('ttt-msg');
+  const cpuBtn = document.getElementById('ttt-vs-cpu');
+  const resetBtn = document.getElementById('ttt-reset');
+  let cells, turn, gameOver, vsCpu = false;
+  const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function render(){
+    boardEl.innerHTML = '';
+    cells.forEach((val, i)=>{
+      const b = document.createElement('button');
+      b.textContent = val || '';
+      b.disabled = !!val || gameOver;
+      b.addEventListener('click', ()=> playAt(i));
+      boardEl.appendChild(b);
+    });
+  }
+  function checkWinner(c){
+    for(const [a,b,cc] of WINS){
+      if(c[a] && c[a]===c[b] && c[b]===c[cc]) return c[a];
+    }
+    if(c.every(v=>v)) return 'draw';
+    return null;
+  }
+  function playAt(i){
+    if(cells[i] || gameOver) return;
+    cells[i] = turn;
+    const w = checkWinner(cells);
+    if(w){ finish(w); return; }
+    turn = turn === 'X' ? 'O' : 'X';
+    render();
+    if(vsCpu && turn === 'O' && !gameOver){
+      setTimeout(cpuMove, 400);
+    }
+  }
+  function cpuMove(){
+    if(gameOver) return;
+    const empty = cells.map((v,i)=>v?null:i).filter(v=>v!==null);
+    const pick = empty[Math.floor(Math.random()*empty.length)];
+    playAt(pick);
+  }
+  function finish(w){
+    gameOver = true;
+    if(w === 'draw'){
+      msgEl.textContent = "It's a draw — reset the board.";
+      recordRound(false);
+    } else {
+      msgEl.textContent = (vsCpu && w === 'O') ? 'The house takes it. Play again?' : `${w} wins the round!`;
+      recordRound(!(vsCpu && w==='O'));
+    }
+    render();
+  }
+  function reset(){
+    cells = Array(9).fill(null);
+    turn = 'X';
+    gameOver = false;
+    msgEl.textContent = '';
+    render();
+  }
+  cpuBtn.addEventListener('click', ()=>{
+    vsCpu = !vsCpu;
+    cpuBtn.textContent = `Play vs house: ${vsCpu ? 'ON' : 'OFF'}`;
+    reset();
+  });
+  resetBtn.addEventListener('click', reset);
+  reset();
+})();
+
+/* ============================================================
+   MEMORY MATCH
+   ============================================================ */
+(function(){
+  const boardEl = document.getElementById('mem-board');
+  const movesEl = document.getElementById('mem-moves');
+  const pairsEl = document.getElementById('mem-pairs');
+  const timeEl = document.getElementById('mem-time');
+  const resetBtn = document.getElementById('mem-reset');
+  const ICONS = [
+    {icon:'🎲', bg:'#ffe3d1'},
+    {icon:'🃏', bg:'#dcecff'},
+    {icon:'🎯', bg:'#ffd6dd'},
+    {icon:'🧩', bg:'#dcffe4'},
+    {icon:'🎳', bg:'#fff3c4'},
+    {icon:'🀄', bg:'#f0dcff'},
+    {icon:'🎱', bg:'#d9f7f2'},
+    {icon:'🕹️', bg:'#ffe0f0'},
+  ];
+  let deck, flipped, matched, moves, timer, seconds, locked;
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+  function build(){
+    clearInterval(timer);
+    deck = shuffle([...ICONS, ...ICONS]);
+    flipped = []; matched = new Set(); moves = 0; seconds = 0; locked = false;
+    movesEl.textContent = 0; pairsEl.textContent = 0; timeEl.textContent = '0s';
+    boardEl.innerHTML = '';
+    deck.forEach((item, i)=>{
+      const card = document.createElement('div');
+      card.className = 'mem-card';
+      card.dataset.icon = item.icon;
+      card.dataset.idx = i;
+      card.innerHTML = `
+        <button class="inner">
+          <span class="mem-face back">?</span>
+          <span class="mem-face front" style="--tile-bg:${item.bg}">${item.icon}</span>
+        </button>`;
+      card.querySelector('button').addEventListener('click', ()=> flip(card));
+      boardEl.appendChild(card);
+    });
+    timer = setInterval(()=>{ seconds++; timeEl.textContent = seconds+'s'; }, 1000);
+  }
+  function flip(card){
+    if(locked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    flipped.push(card);
+    if(flipped.length === 2){
+      moves++; movesEl.textContent = moves;
+      locked = true;
+      const [a,b] = flipped;
+      if(a.dataset.icon === b.dataset.icon){
+        a.classList.add('matched'); b.classList.add('matched');
+        matched.add(a.dataset.idx); matched.add(b.dataset.idx);
+        pairsEl.textContent = matched.size/2;
+        flipped = []; locked = false;
+        if(matched.size === deck.length){
+          clearInterval(timer);
+          recordRound(true);
+        }
+      } else {
+        setTimeout(()=>{
+          a.classList.remove('flipped'); b.classList.remove('flipped');
+          flipped = []; locked = false;
+        }, 700);
+      }
+    }
+  }
+  resetBtn.addEventListener('click', build);
+  build();
+})();
+
+/* ============================================================
+   SNAKE
+   ============================================================ */
+let snakeStarted = false;
+let snakeBest = 0;
+function initSnake(){
+  snakeStarted = true;
+  const canvas = document.getElementById('snake-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('snake-score');
+  const bestEl = document.getElementById('snake-best');
+  const resetBtn = document.getElementById('snake-reset');
+  const SIZE = 18, CELLS = canvas.width / SIZE;
+  let snake, dir, nextDir, food, score, loopId, running;
+
+  function place(){
+    return { x: Math.floor(Math.random()*CELLS), y: Math.floor(Math.random()*CELLS) };
+  }
+  function reset(){
+    snake = [{x:9,y:9},{x:8,y:9},{x:7,y:9}];
+    dir = {x:1,y:0}; nextDir = {x:1,y:0};
+    food = place();
+    score = 0; running = true;
+    scoreEl.textContent = 0;
+    clearInterval(loopId);
+    loopId = setInterval(tick, 110);
+    draw();
+  }
+  function tick(){
+    if(!running) return;
+    dir = nextDir;
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    if(head.x<0||head.y<0||head.x>=CELLS||head.y>=CELLS||snake.some(s=>s.x===head.x&&s.y===head.y)){
+      running = false;
+      clearInterval(loopId);
+      if(score > snakeBest){ snakeBest = score; bestEl.textContent = snakeBest; }
+      recordRound(score > 0);
+      draw(true);
+      return;
+    }
+    snake.unshift(head);
+    if(head.x === food.x && head.y === food.y){
+      score++; scoreEl.textContent = score;
+      food = place();
+      while(snake.some(s=>s.x===food.x && s.y===food.y)) food = place();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+  function draw(gameOver){
+    ctx.fillStyle = '#1b4332';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#a63446';
+    ctx.beginPath();
+    ctx.arc(food.x*SIZE+SIZE/2, food.y*SIZE+SIZE/2, SIZE/2.6, 0, Math.PI*2);
+    ctx.fill();
+    snake.forEach((s,i)=>{
+      ctx.fillStyle = i===0 ? '#e0bf4f' : '#f5efe0';
+      ctx.fillRect(s.x*SIZE+1, s.y*SIZE+1, SIZE-2, SIZE-2);
+    });
+    if(gameOver){
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#f5efe0';
+      ctx.font = '600 20px Space Grotesk, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game over — new game to retry', canvas.width/2, canvas.height/2);
+    }
+  }
+  function setDir(x,y){
+    if(dir.x === -x && dir.y === -y) return;
+    nextDir = {x,y};
+  }
+  window.addEventListener('keydown', (e)=>{
+    if(activeGame !== 'snake') return;
+    if(['ArrowUp','w','W'].includes(e.key)) setDir(0,-1);
+    else if(['ArrowDown','s','S'].includes(e.key)) setDir(0,1);
+    else if(['ArrowLeft','a','A'].includes(e.key)) setDir(-1,0);
+    else if(['ArrowRight','d','D'].includes(e.key)) setDir(1,0);
+    else return;
+    e.preventDefault();
+  });
+  document.getElementById('dpad-up').addEventListener('click', ()=>setDir(0,-1));
+  document.getElementById('dpad-down').addEventListener('click', ()=>setDir(0,1));
+  document.getElementById('dpad-left').addEventListener('click', ()=>setDir(-1,0));
+  document.getElementById('dpad-right').addEventListener('click', ()=>setDir(1,0));
+  resetBtn.addEventListener('click', reset);
+  reset();
+}
+
+/* ============================================================
+   2048
+   ============================================================ */
+let g2048Started = false;
+let g2048Best = 0;
+function initG2048(){
+  g2048Started = true;
+  const boardEl = document.getElementById('g2048-board');
+  const scoreEl = document.getElementById('g2048-score');
+  const bestEl = document.getElementById('g2048-best');
+  const msgEl = document.getElementById('g2048-msg');
+  const resetBtn = document.getElementById('g2048-reset');
+  let grid, score, over;
+
+  function empty(){ return Array.from({length:4},()=>Array(4).fill(0)); }
+  function addTile(){
+    const spots = [];
+    for(let r=0;r<4;r++) for(let c=0;c<4;c++) if(grid[r][c]===0) spots.push([r,c]);
+    if(!spots.length) return;
+    const [r,c] = spots[Math.floor(Math.random()*spots.length)];
+    grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+  }
+  function reset(){
+    grid = empty(); score = 0; over = false;
+    msgEl.textContent = '';
+    addTile(); addTile();
+    scoreEl.textContent = 0;
+    render();
+  }
+  function render(){
+    boardEl.innerHTML = '';
+    for(let r=0;r<4;r++) for(let c=0;c<4;c++){
+      const v = grid[r][c];
+      const d = document.createElement('div');
+      d.className = 'tile2048' + (v ? ` t-${v}` : '');
+      d.textContent = v || '';
+      boardEl.appendChild(d);
+    }
+  }
+  function slideRowLeft(row){
+    let vals = row.filter(v=>v!==0);
+    for(let i=0;i<vals.length-1;i++){
+      if(vals[i] === vals[i+1]){
+        vals[i]*=2; score += vals[i];
+        vals.splice(i+1,1);
+      }
+    }
+    while(vals.length<4) vals.push(0);
+    return vals;
+  }
+  function rotateGrid(g){
+    const n = empty();
+    for(let r=0;r<4;r++) for(let c=0;c<4;c++) n[c][3-r] = g[r][c];
+    return n;
+  }
+  function move(dir){
+    if(over) return;
+    let g = grid;
+    let rotations = {left:0, up:3, right:2, down:1}[dir];
+    for(let i=0;i<rotations;i++) g = rotateGrid(g);
+    let moved = false;
+    const newGrid = g.map(row=>{
+      const res = slideRowLeft(row);
+      if(res.join() !== row.join()) moved = true;
+      return res;
+    });
+    let back = newGrid;
+    for(let i=0;i<(4-rotations)%4;i++) back = rotateGrid(back);
+    if(moved){
+      grid = back;
+      addTile();
+      scoreEl.textContent = score;
+      if(score > g2048Best){ g2048Best = score; bestEl.textContent = g2048Best; }
+      render();
+      checkOver();
+    }
+  }
+  function canMove(){
+    for(let r=0;r<4;r++) for(let c=0;c<4;c++){
+      if(grid[r][c]===0) return true;
+      if(c<3 && grid[r][c]===grid[r][c+1]) return true;
+      if(r<3 && grid[r][c]===grid[r+1][c]) return true;
+    }
+    return false;
+  }
+  function checkOver(){
+    const won = grid.some(row=>row.includes(2048));
+    if(won && !over){
+      over = true; msgEl.textContent = '2048! You can keep sliding, or start fresh.';
+      recordRound(true);
+      over = false;
+      return;
+    }
+    if(!canMove()){
+      over = true;
+      msgEl.textContent = 'No more moves — new game to try again.';
+      recordRound(false);
+    }
+  }
+  window.addEventListener('keydown', (e)=>{
+    if(activeGame !== 'g2048') return;
+    const map = {ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down', a:'left', d:'right', w:'up', s:'down'};
+    if(map[e.key]){ e.preventDefault(); move(map[e.key]); }
+  });
+  let touchX, touchY;
+  boardEl.addEventListener('touchstart', e=>{
+    touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
+  });
+  boardEl.addEventListener('touchend', e=>{
+    if(touchX===undefined) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if(Math.max(Math.abs(dx),Math.abs(dy)) < 24) return;
+    if(Math.abs(dx) > Math.abs(dy)) move(dx>0 ? 'right':'left');
+    else move(dy>0 ? 'down':'up');
+  });
+  resetBtn.addEventListener('click', reset);
+  reset();
+}
+
+/* ============================================================
+   ROCK PAPER SCISSORS
+   ============================================================ */
+(function(){
+  const youEl = document.getElementById('rps-you');
+  const houseEl = document.getElementById('rps-house');
+  const resultEl = document.getElementById('rps-result');
+  const winsEl = document.getElementById('rps-wins');
+  const lossesEl = document.getElementById('rps-losses');
+  const tiesEl = document.getElementById('rps-ties');
+  const ICON = {rock:'✊', paper:'✋', scissors:'✌️'};
+  const BEATS = {rock:'scissors', paper:'rock', scissors:'paper'};
+  let w=0,l=0,t=0;
+  document.querySelectorAll('.rps-choices button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const you = b.dataset.choice;
+      const options = ['rock','paper','scissors'];
+      const house = options[Math.floor(Math.random()*3)];
+      youEl.textContent = ICON[you];
+      houseEl.textContent = ICON[house];
+      if(you === house){
+        t++; tiesEl.textContent = t;
+        resultEl.textContent = "Tie — throw again.";
+      } else if(BEATS[you] === house){
+        w++; winsEl.textContent = w;
+        resultEl.textContent = "You win that hand.";
+        recordRound(true);
+      } else {
+        l++; lossesEl.textContent = l;
+        resultEl.textContent = "House takes it.";
+        recordRound(false);
+      }
+    });
+  });
+})();
+
+/* ============================================================
+   WHACK-A-MOLE
+   ============================================================ */
+let whackTimerId = null;
+(function(){
+  const boardEl = document.getElementById('whack-board');
+  const scoreEl = document.getElementById('whack-score');
+  const timeEl = document.getElementById('whack-time');
+  const bestEl = document.getElementById('whack-best');
+  const startBtn = document.getElementById('whack-start');
+  let holes = [];
+  let score, timeLeft, moleTimer, activeHole, best = 0;
+
+  for(let i=0;i<9;i++){
+    const hole = document.createElement('div');
+    hole.className = 'hole';
+    hole.innerHTML = `<button aria-label="whack">🐹</button>`;
+    hole.querySelector('button').addEventListener('click', ()=>{
+      if(hole.classList.contains('up') && !hole.classList.contains('whacked')){
+        hole.classList.add('whacked');
+        score++; scoreEl.textContent = score;
+        setTimeout(()=> hole.classList.remove('up','whacked'), 100);
+      }
+    });
+    boardEl.appendChild(hole);
+    holes.push(hole);
+  }
+  function popRandom(){
+    holes.forEach(h=>h.classList.remove('up','whacked'));
+    const h = holes[Math.floor(Math.random()*holes.length)];
+    h.classList.add('up');
+    activeHole = h;
+    const dur = 500 + Math.random()*500;
+    setTimeout(()=>{ if(h===activeHole) h.classList.remove('up'); }, dur);
+  }
+  function start(){
+    score = 0; timeLeft = 30;
+    scoreEl.textContent = 0; timeEl.textContent = '30s';
+    startBtn.disabled = true; startBtn.textContent = 'Round in progress…';
+    clearInterval(whackTimerId); clearInterval(moleTimer);
+    moleTimer = setInterval(popRandom, 700);
+    whackTimerId = setInterval(()=>{
+      timeLeft--; timeEl.textContent = timeLeft+'s';
+      if(timeLeft<=0){
+        clearInterval(whackTimerId); clearInterval(moleTimer);
+        holes.forEach(h=>h.classList.remove('up','whacked'));
+        startBtn.disabled = false; startBtn.textContent = 'Start round';
+        if(score > best){ best = score; bestEl.textContent = best; }
+        recordRound(score >= 8);
+      }
+    }, 1000);
+  }
+  startBtn.addEventListener('click', start);
+})();
+
+/* ============================================================
+   CONNECT FOUR
+   ============================================================ */
+(function(){
+  const boardEl = document.getElementById('c4-board');
+  const msgEl = document.getElementById('c4-msg');
+  const resetBtn = document.getElementById('c4-reset');
+  const cpuBtn = document.getElementById('c4-vs-cpu');
+  const ROWS = 6, COLS = 7;
+  let grid, turn, over, cols, vsCpu = false;
+
+  function build(){
+    grid = Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
+    turn = 'red'; over = false;
+    msgEl.textContent = "Red's turn to drop.";
+    boardEl.innerHTML = '';
+    cols = [];
+    for(let c=0;c<COLS;c++){
+      const colEl = document.createElement('div');
+      colEl.className = 'c4-col';
+      colEl.addEventListener('click', ()=> humanDrop(c));
+      const cells = [];
+      for(let r=0;r<ROWS;r++){
+        const cell = document.createElement('div');
+        cell.className = 'c4-cell';
+        colEl.appendChild(cell);
+        cells.push(cell);
+      }
+      boardEl.appendChild(colEl);
+      cols.push(cells);
+    }
+  }
+  function humanDrop(c){
+    if(over) return;
+    if(vsCpu && turn !== 'red') return;
+    if(drop(c) && vsCpu && !over){
+      msgEl.textContent = "House is thinking…";
+      setTimeout(cpuMove, 450);
+    }
+  }
+  function lowestEmptyRow(g, c){
+    for(let r=0;r<ROWS;r++) if(!g[r][c]) return r;
+    return -1;
+  }
+  function drop(c){
+    const r = lowestEmptyRow(grid, c);
+    if(r === -1) return false;
+    grid[r][c] = turn;
+    cols[c][r].classList.add(turn);
+    if(checkWin(grid, r, c, turn)){
+      over = true;
+      const won = turn === 'red';
+      msgEl.textContent = vsCpu
+        ? (won ? 'You connect four and win!' : 'The house connects four and wins.')
+        : `${turn === 'red' ? 'Red' : 'Yellow'} connects four and wins!`;
+      recordRound(won || !vsCpu);
+      return true;
+    }
+    if(grid.every(row => row.every(v=>v))){
+      over = true;
+      msgEl.textContent = "Board's full — it's a draw.";
+      recordRound(false);
+      return true;
+    }
+    turn = turn === 'red' ? 'yellow' : 'red';
+    if(!vsCpu) msgEl.textContent = `${turn === 'red' ? "Red's" : "Yellow's"} turn to drop.`;
+    return true;
+  }
+  function validCols(g){
+    const list = [];
+    for(let c=0;c<COLS;c++) if(lowestEmptyRow(g,c) !== -1) list.push(c);
+    return list;
+  }
+  function cpuMove(){
+    if(over) return;
+    const options = validCols(grid);
+    // 1. Take a winning move if the house has one.
+    for(const c of options){
+      const r = lowestEmptyRow(grid, c);
+      grid[r][c] = 'yellow';
+      const wins = checkWin(grid, r, c, 'yellow');
+      grid[r][c] = null;
+      if(wins){ drop(c); msgEl.textContent = over ? msgEl.textContent : "House's turn."; return; }
+    }
+    // 2. Block the player's winning move.
+    for(const c of options){
+      const r = lowestEmptyRow(grid, c);
+      grid[r][c] = 'red';
+      const blocks = checkWin(grid, r, c, 'red');
+      grid[r][c] = null;
+      if(blocks){ drop(c); return; }
+    }
+    // 3. Otherwise favor central columns.
+    const weighted = [];
+    options.forEach(c=>{
+      const weight = 4 - Math.abs(3 - c);
+      for(let i=0;i<weight;i++) weighted.push(c);
+    });
+    const pick = weighted[Math.floor(Math.random()*weighted.length)];
+    drop(pick);
+  }
+  function checkWin(g, r, c, color){
+    const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+    for(const [dr,dc] of dirs){
+      let count = 1;
+      for(const sign of [1,-1]){
+        let rr = r + dr*sign, cc = c + dc*sign;
+        while(rr>=0 && rr<ROWS && cc>=0 && cc<COLS && g[rr][cc]===color){
+          count++; rr += dr*sign; cc += dc*sign;
+        }
+      }
+      if(count >= 4) return true;
+    }
+    return false;
+  }
+  cpuBtn.addEventListener('click', ()=>{
+    vsCpu = !vsCpu;
+    cpuBtn.textContent = `Play vs house: ${vsCpu ? 'ON' : 'OFF'}`;
+    build();
+  });
+  resetBtn.addEventListener('click', build);
+  build();
+})();
+
+/* ============================================================
+   SIMON SAYS
+   ============================================================ */
+(function(){
+  const pads = Array.from(document.querySelectorAll('.simon-pad'));
+  const roundEl = document.getElementById('simon-round');
+  const bestEl = document.getElementById('simon-best');
+  const msgEl = document.getElementById('simon-msg');
+  const startBtn = document.getElementById('simon-start');
+  let sequence, playerStep, best = 0, accepting;
+
+  function lightPad(i, dur=420){
+    return new Promise(res=>{
+      pads[i].classList.add('lit');
+      setTimeout(()=>{ pads[i].classList.remove('lit'); res(); }, dur);
+    });
+  }
+  async function playSequence(){
+    accepting = false;
+    msgEl.textContent = 'Watch closely…';
+    await new Promise(r=>setTimeout(r, 500));
+    for(const i of sequence){
+      await lightPad(i);
+      await new Promise(r=>setTimeout(r, 180));
+    }
+    playerStep = 0;
+    accepting = true;
+    msgEl.textContent = 'Your turn — repeat it back.';
+  }
+  function nextRound(){
+    sequence.push(Math.floor(Math.random()*4));
+    roundEl.textContent = sequence.length;
+    playSequence();
+  }
+  function start(){
+    sequence = [];
+    startBtn.textContent = 'Restart';
+    nextRound();
+  }
+  pads.forEach((pad,i)=>{
+    pad.addEventListener('click', ()=>{
+      if(!accepting) return;
+      lightPad(i, 220);
+      if(i === sequence[playerStep]){
+        playerStep++;
+        if(playerStep === sequence.length){
+          accepting = false;
+          setTimeout(nextRound, 600);
+        }
+      } else {
+        accepting = false;
+        if(sequence.length - 1 > best){ best = sequence.length - 1; bestEl.textContent = best; }
+        msgEl.textContent = `Round broken at ${sequence.length}. Hit start to try again.`;
+        recordRound(sequence.length > 3);
+      }
+    });
+  });
+  startBtn.addEventListener('click', start);
+})();
+
+/* ============================================================
+   BREAKOUT
+   ============================================================ */
+let breakoutStarted = false;
+let breakoutBest = 0;
+function initBreakout(){
+  breakoutStarted = true;
+  const canvas = document.getElementById('breakout-canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('breakout-score');
+  const livesEl = document.getElementById('breakout-lives');
+  const bestEl = document.getElementById('breakout-best');
+  const resetBtn = document.getElementById('breakout-reset');
+  const W = canvas.width, H = canvas.height;
+  const PADDLE_W = 74, PADDLE_H = 12, BALL_R = 7;
+  const ROWS = 5, COLS = 8, BRICK_H = 20, GAP = 4;
+  const BRICK_W = (W - GAP*(COLS+1)) / COLS;
+  const BRICK_COLORS = ['#a63446','#c9a227','#3ea36b','#3b74b0','#8a5fb0'];
+  let paddleX, ballX, ballY, ballDX, ballDY, bricks, score, lives, running, loopId;
+
+  function resetBricks(){
+    bricks = [];
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      bricks.push({ x: GAP + c*(BRICK_W+GAP), y: 30 + r*(BRICK_H+GAP), alive:true, color: BRICK_COLORS[r % BRICK_COLORS.length] });
+    }
+  }
+  function reset(){
+    paddleX = W/2 - PADDLE_W/2;
+    ballX = W/2; ballY = H - 40;
+    ballDX = 3 * (Math.random() < 0.5 ? 1 : -1); ballDY = -3.4;
+    resetBricks();
+    score = 0; lives = 1; running = true;
+    scoreEl.textContent = 0; livesEl.textContent = 1;
+    clearInterval(loopId);
+    loopId = setInterval(tick, 16);
+  }
+  function tick(){
+    if(!running) return;
+    ballX += ballDX; ballY += ballDY;
+    if(ballX < BALL_R || ballX > W - BALL_R) ballDX *= -1;
+    if(ballY < BALL_R) ballDY *= -1;
+    if(ballY > H - PADDLE_H - 14 - BALL_R && ballY < H - 14 + BALL_R &&
+       ballX > paddleX && ballX < paddleX + PADDLE_W && ballDY > 0){
+      ballDY *= -1;
+      const hit = (ballX - (paddleX + PADDLE_W/2)) / (PADDLE_W/2);
+      ballDX = hit * 4.2;
+    }
+    if(ballY > H){
+      lives--; livesEl.textContent = lives;
+      if(lives <= 0){
+        running = false;
+        clearInterval(loopId);
+        if(score > breakoutBest){ breakoutBest = score; bestEl.textContent = breakoutBest; }
+        recordRound(bricks.every(b=>!b.alive));
+        draw(true);
+        return;
+      }
+      ballX = W/2; ballY = H - 40;
+      ballDX = 3 * (Math.random() < 0.5 ? 1 : -1); ballDY = -3.4;
+    }
+    bricks.forEach(b=>{
+      if(!b.alive) return;
+      if(ballX > b.x && ballX < b.x + BRICK_W && ballY - BALL_R < b.y + BRICK_H && ballY + BALL_R > b.y){
+        b.alive = false; ballDY *= -1;
+        score += 10; scoreEl.textContent = score;
+      }
+    });
+    if(bricks.every(b=>!b.alive)){
+      running = false;
+      clearInterval(loopId);
+      if(score > breakoutBest){ breakoutBest = score; bestEl.textContent = breakoutBest; }
+      recordRound(true);
+      draw(true, true);
+      return;
+    }
+    draw();
+  }
+  function draw(gameOver, won){
+    ctx.fillStyle = '#1b4332';
+    ctx.fillRect(0,0,W,H);
+    bricks.forEach(b=>{
+      if(!b.alive) return;
+      ctx.fillStyle = b.color;
+      ctx.fillRect(b.x, b.y, BRICK_W, BRICK_H);
+    });
+    ctx.fillStyle = '#f5efe0';
+    ctx.fillRect(paddleX, H-14, PADDLE_W, PADDLE_H);
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, BALL_R, 0, Math.PI*2);
+    ctx.fillStyle = '#e0bf4f';
+    ctx.fill();
+    if(gameOver){
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#f5efe0';
+      ctx.font = '600 18px Space Grotesk, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(won ? 'Wall cleared! New game to play again' : 'Game over — new game to retry', W/2, H/2);
+    }
+  }
+  function movePaddleTo(clientX){
+    const rect = canvas.getBoundingClientRect();
+    const scale = W / rect.width;
+    let x = (clientX - rect.left) * scale - PADDLE_W/2;
+    paddleX = Math.max(0, Math.min(W - PADDLE_W, x));
+  }
+  canvas.addEventListener('mousemove', e=> movePaddleTo(e.clientX));
+  canvas.addEventListener('touchmove', e=>{
+    movePaddleTo(e.touches[0].clientX);
+    e.preventDefault();
+  }, {passive:false});
+  window.addEventListener('keydown', e=>{
+    if(activeGame !== 'breakout') return;
+    if(e.key === 'ArrowLeft') paddleX = Math.max(0, paddleX - 24);
+    else if(e.key === 'ArrowRight') paddleX = Math.min(W - PADDLE_W, paddleX + 24);
+    else return;
+    e.preventDefault();
+  });
+  resetBtn.addEventListener('click', reset);
+  reset();
+}
+
+/* ============================================================
+   SLIDING PUZZLE
+   ============================================================ */
+let slideStarted = false;
+let slideBest = null;
+function initSlide(){
+  slideStarted = true;
+  const boardEl = document.getElementById('slide-board');
+  const movesEl = document.getElementById('slide-moves');
+  const bestEl = document.getElementById('slide-best');
+  const msgEl = document.getElementById('slide-msg');
+  const resetBtn = document.getElementById('slide-reset');
+  let tiles, moves, blankIdx, won;
+
+  function isSolvable(arr){
+    let inv = 0;
+    const flat = arr.filter(v=>v!==0);
+    for(let i=0;i<flat.length;i++) for(let j=i+1;j<flat.length;j++) if(flat[i]>flat[j]) inv++;
+    return inv % 2 === 0;
+  }
+  function shuffle(){
+    let arr;
+    do{
+      arr = [...Array(15).keys()].map(n=>n+1);
+      arr.push(0);
+      for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+    } while(!isSolvable(arr) || isSolved(arr));
+    return arr;
+  }
+  function isSolved(arr){
+    for(let i=0;i<15;i++) if(arr[i] !== i+1) return false;
+    return arr[15] === 0;
+  }
+  function build(){
+    tiles = shuffle();
+    blankIdx = tiles.indexOf(0);
+    moves = 0; won = false;
+    movesEl.textContent = 0;
+    msgEl.textContent = '';
+    render();
+  }
+  function render(){
+    boardEl.innerHTML = '';
+    tiles.forEach((v,i)=>{
+      const b = document.createElement('button');
+      b.className = 'slide-tile' + (v===0 ? ' blank' : '');
+      b.textContent = v || '';
+      b.addEventListener('click', ()=> tryMove(i));
+      boardEl.appendChild(b);
+    });
+  }
+  function tryMove(i){
+    if(won) return;
+    const r1 = Math.floor(i/4), c1 = i%4;
+    const r2 = Math.floor(blankIdx/4), c2 = blankIdx%4;
+    if(Math.abs(r1-r2)+Math.abs(c1-c2) !== 1) return;
+    [tiles[i], tiles[blankIdx]] = [tiles[blankIdx], tiles[i]];
+    blankIdx = i;
+    moves++; movesEl.textContent = moves;
+    render();
+    if(isSolved(tiles)){
+      won = true;
+      msgEl.textContent = `Solved in ${moves} moves!`;
+      if(slideBest === null || moves < slideBest){ slideBest = moves; bestEl.textContent = slideBest; }
+      recordRound(true);
+    }
+  }
+  resetBtn.addEventListener('click', build);
+  build();
+}
+</script>
 </body>
 </html>

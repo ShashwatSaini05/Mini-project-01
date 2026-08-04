@@ -2,7 +2,7 @@
 
 # 🎮 Game Night
 
-### **10 Fun Browser Games • One Place • Pure HTML & CSS**
+### **Fun Browser Games • One Place • Pure HTML & CSS**
 
 <p>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Single_File-HTML-purple?style=for-the-badge"/>
 </p>
 
-### 🎲 A beautifully designed collection of **10 browser-based mini games** built entirely with **HTML & CSS**.
+### 🎲 A beautifully designed collection of **browser-based mini games** built entirely with **HTML & CSS**.
 
 Enjoy classic games in a modern, lightweight, and responsive interface—no installation required.
 
@@ -30,7 +30,7 @@ Enjoy classic games in a modern, lightweight, and responsive interface—no inst
 
 ### ✨ Features
 
-🎯 **10 Interactive Games**
+🎯 **Interactive Games**
 ⚡ **Fast & Lightweight**
 📱 **Responsive Design**
 🎨 **Modern UI**

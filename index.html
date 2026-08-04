@@ -3409,7 +3409,7 @@
                 newWind(); draw();
             }
             function newWind() {
-                wind = (Math.random() - 0.5) * 100;
+                wind = (Math.random() - 0.5) * 500;
                 const dir = wind >= 0 ? '→' : '←';
                 windEl.textContent = 'Wind: ' + Math.abs(wind).toFixed(1) + ' ' + dir;
             }

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Night — Nineteen Games, One Table</title>
-    <link rel="icon" type="image/png" href="ico.png">
+    <title>Game Night </title>
+    <link rel="icon" type="image/png" href="icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
@@ -294,6 +294,18 @@
 
         .card:nth-child(19) {
             --tilt: -2deg;
+        }
+
+        .card:nth-child(20) {
+            --tilt: 1.2deg;
+        }
+
+        .card:nth-child(21) {
+            --tilt: -1.5deg;
+        }
+
+        .card:nth-child(22) {
+            --tilt: 0.8deg;
         }
 
 
@@ -984,7 +996,9 @@
             text-align: center;
             font-family: 'IBM Plex Mono', monospace;
             font-size: .95rem;
-            color: var(--brass-light);
+            font-weight: bold;
+            /* or 700 */
+            color: var(--brass-light, gold);
             margin-top: 10px;
         }
 
@@ -1099,16 +1113,19 @@
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             gap: 0;
-            max-width: 400px;
+            /* Fit within the screen on mobile, max 400px on desktop */
+            width: min(400px, calc(100vw - 32px));
             margin: 0 auto;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 6px 20px rgba(0, 0, 0, .4);
+            /* Expose cell size as a token (board ÷ 8) */
+            --ck-cell: calc(min(400px, calc(100vw - 32px)) / 8);
         }
 
         .ck-cell {
-            width: 50px;
-            height: 50px;
+            width: var(--ck-cell);
+            height: var(--ck-cell);
             border: none;
             display: flex;
             align-items: center;
@@ -1137,23 +1154,26 @@
 
         .ck-cell.valid-move::after {
             content: '';
-            width: 16px;
-            height: 16px;
+            /* dot scales with cell size */
+            width: calc(var(--ck-cell) * 0.32);
+            height: calc(var(--ck-cell) * 0.32);
             border-radius: 50%;
             background: rgba(201, 162, 39, 0.4);
             position: absolute;
         }
 
         .ck-piece {
-            width: 36px;
-            height: 36px;
+            /* piece = 72% of cell */
+            width: calc(var(--ck-cell) * 0.72);
+            height: calc(var(--ck-cell) * 0.72);
             border-radius: 50%;
             border: 3px solid rgba(0, 0, 0, .25);
             box-shadow: 0 3px 6px rgba(0, 0, 0, .3), inset 0 2px 4px rgba(255, 255, 255, .15);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            /* crown icon scales with cell */
+            font-size: calc(var(--ck-cell) * 0.36);
             transition: transform .1s ease;
         }
 
@@ -1473,6 +1493,323 @@
             touch-action: none;
         }
 
+        /* ---------- stack tower ---------- */
+        #tower-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        #tower-canvas {
+            background: linear-gradient(180deg, #0a1e14 0%, #1b4332 100%);
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 4px var(--wood-light);
+            max-width: 100%;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        /* ---------- reaction timer ---------- */
+        .reaction-display {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .reaction-target {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(2rem, 6vw, 3.4rem);
+            font-weight: 700;
+            color: var(--brass-light);
+            letter-spacing: .04em;
+            margin-bottom: 12px;
+        }
+
+        .reaction-target .label {
+            font-size: .7em;
+            color: #6b5f4f;
+            display: block;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+        }
+
+        .reaction-running {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: clamp(2.8rem, 8vw, 4.6rem);
+            font-weight: 700;
+            color: var(--wood);
+            letter-spacing: .02em;
+            transition: color .15s;
+        }
+
+        .reaction-running.close {
+            color: var(--brass);
+        }
+
+        .reaction-running.hit {
+            color: #3ea36b;
+        }
+
+        .reaction-running.miss {
+            color: var(--dice-red);
+        }
+
+        .reaction-stop-btn {
+            display: block;
+            margin: 22px auto 0;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 6px solid var(--dice-red-dark);
+            background: radial-gradient(circle at 40% 35%, #e04a60, var(--dice-red) 65%, var(--dice-red-dark));
+            color: var(--cream);
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            box-shadow: 0 6px 0 var(--dice-red-dark), 0 10px 30px rgba(0, 0, 0, .4);
+            transition: transform .1s ease, box-shadow .1s ease;
+            cursor: pointer;
+        }
+
+        .reaction-stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 var(--dice-red-dark), 0 14px 35px rgba(0, 0, 0, .45);
+        }
+
+        .reaction-stop-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--dice-red-dark), 0 4px 10px rgba(0, 0, 0, .3);
+        }
+
+        .reaction-stop-btn:disabled {
+            opacity: .4;
+            cursor: default;
+            transform: none;
+            box-shadow: 0 6px 0 var(--dice-red-dark);
+        }
+
+        .reaction-result-text {
+            text-align: center;
+            font-weight: 600;
+            color: var(--wood);
+            min-height: 1.4em;
+            margin-top: 16px;
+        }
+
+        .reaction-bar-container {
+            max-width: 400px;
+            margin: 18px auto 0;
+            height: 18px;
+            background: var(--wood-light);
+            border-radius: 9px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reaction-bar-fill {
+            height: 100%;
+            border-radius: 9px;
+            background: linear-gradient(90deg, #3ea36b, var(--brass));
+            transition: width .05s linear;
+        }
+
+        .reaction-bar-marker {
+            position: absolute;
+            top: -2px;
+            width: 4px;
+            height: 22px;
+            background: var(--dice-red);
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        /* ---------- space invader ---------- */
+        #invader-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        #invader-canvas {
+            background: #050d18;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 4px var(--wood-light), 0 0 40px rgba(0, 0, 0, .5);
+            max-width: 100%;
+            touch-action: none;
+        }
+
+        .invader-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .invader-controls button {
+            width: 64px;
+            height: 56px;
+            border: none;
+            border-radius: 10px;
+            background: var(--felt);
+            color: var(--cream);
+            font-size: 1.3rem;
+            box-shadow: 0 3px 0 #0f2a20;
+        }
+
+        .invader-controls button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0f2a20;
+        }
+
+        /* ---------- meteor dodge ---------- */
+        #meteor-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        #meteor-canvas {
+            background: #08001a;
+            border-radius: 10px;
+            box-shadow: inset 0 0 0 4px var(--wood-light), 0 0 40px rgba(0, 0, 0, .5);
+            max-width: 100%;
+            touch-action: none;
+        }
+
+        .meteor-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .meteor-controls button {
+            width: 64px;
+            height: 56px;
+            border: none;
+            border-radius: 10px;
+            background: var(--felt);
+            color: var(--cream);
+            font-size: 1.3rem;
+            box-shadow: 0 3px 0 #0f2a20;
+        }
+
+        .meteor-controls button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0f2a20;
+        }
+
+        /* ---------- dice duel ---------- */
+        .dd-arena {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .dd-score-bar {
+            display: flex;
+            width: 100%;
+            max-width: 360px;
+            height: 28px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, .4);
+            background: #1a1410;
+        }
+
+        .dd-score-bar .dd-bar-player {
+            background: linear-gradient(90deg, #3ea36b, #2d8a57);
+            height: 100%;
+            transition: width .4s ease;
+            min-width: 0;
+        }
+
+        .dd-score-bar .dd-bar-house {
+            background: linear-gradient(90deg, #c0435a, #a63446);
+            height: 100%;
+            transition: width .4s ease;
+            min-width: 0;
+            margin-left: auto;
+        }
+
+        .dd-dice-area {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 90px;
+        }
+
+        .dd-die {
+            width: 68px;
+            height: 68px;
+            background: var(--cream);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink);
+            box-shadow: 0 4px 0 #bbb3a0, 0 6px 16px rgba(0, 0, 0, .3);
+            transition: transform .2s ease;
+            user-select: none;
+        }
+
+        .dd-die.rolling {
+            animation: diceShake .15s ease infinite;
+        }
+
+        .dd-die.bust {
+            color: #fff;
+            background: var(--dice-red);
+            box-shadow: 0 4px 0 var(--dice-red-dark), 0 6px 16px rgba(0, 0, 0, .3);
+        }
+
+        @keyframes diceShake {
+            0% {
+                transform: rotate(-12deg) scale(1.05);
+            }
+
+            50% {
+                transform: rotate(12deg) scale(0.95);
+            }
+
+            100% {
+                transform: rotate(-12deg) scale(1.05);
+            }
+        }
+
+        .dd-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dd-actions .btn {
+            min-width: 110px;
+        }
+
+        .dd-turn-total {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--brass-light);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .dd-log {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: .82rem;
+            color: var(--cream-dim);
+            max-height: 100px;
+            overflow-y: auto;
+            text-align: center;
+            line-height: 1.6;
+            opacity: .8;
+        }
+
         footer {
             text-align: center;
             padding: 26px;
@@ -1482,14 +1819,293 @@
             opacity: .7;
         }
 
-        @media (max-width:520px) {
+        /* ========== RESPONSIVE — MOBILE ========== */
+        @media (max-width: 520px) {
+
+            /* --- Scoreboard --- */
             .scoreboard {
-                padding: 12px 14px;
+                padding: 10px 12px;
             }
 
             .scoreboard .tally {
                 font-size: .7rem;
+                gap: 10px;
+            }
+
+            .scoreboard h1 {
+                font-size: 1.1rem;
+            }
+
+            .back-btn {
+                padding: 7px 12px;
+                font-size: .78rem;
+            }
+
+            /* --- Hero --- */
+            .hero {
+                margin: 28px auto 4px;
+                padding: 0 16px;
+            }
+
+            .hero p {
+                font-size: .92rem;
+            }
+
+            /* --- Card board --- */
+            .board {
+                margin: 24px auto 50px;
+                padding: 20px 12px;
+                gap: 20px 16px;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                border-radius: 12px;
+                box-shadow: inset 0 0 0 6px var(--wood-light), inset 0 0 20px rgba(0, 0, 0, .5), var(--paper-shadow);
+            }
+
+            .card {
+                padding: 18px 16px 20px;
+                min-height: 160px;
+                transform: none !important;
+            }
+
+            .card:hover {
+                transform: none !important;
+            }
+
+            /* --- Game views --- */
+            .game-view {
+                margin: 16px auto 40px;
+                padding: 0 10px;
+            }
+
+            .game-card {
+                padding: 20px 14px 26px;
+                border-radius: 10px;
+            }
+
+            .game-card h2 {
+                font-size: 1.35rem;
+                gap: 8px;
+            }
+
+            .game-card .sub {
+                font-size: .84rem;
+                margin-bottom: 14px;
+            }
+
+            .stat-line {
+                font-size: .75rem;
                 gap: 12px;
+                margin-bottom: 14px;
+            }
+
+            .controls-row {
+                margin-bottom: 14px;
+            }
+
+            .btn {
+                padding: 8px 14px;
+                font-size: .82rem;
+            }
+
+            /* --- Sea Battle — responsive cells --- */
+            .sea-cell {
+                width: calc((min(100vw - 60px, 320px)) / 8);
+                height: calc((min(100vw - 60px, 320px)) / 8);
+                font-size: .8rem;
+            }
+
+            .sea-grids {
+                gap: 16px;
+            }
+
+            .sea-grid-box h4 {
+                font-size: .75rem;
+            }
+
+            /* --- Reversi — responsive cells --- */
+            .reversi-board {
+                max-width: min(400px, calc(100vw - 32px));
+            }
+
+            .rv-cell {
+                width: calc((min(400px, calc(100vw - 44px)) - 14px) / 8);
+                height: calc((min(400px, calc(100vw - 44px)) - 14px) / 8);
+            }
+
+            .rv-disc {
+                width: calc((min(400px, calc(100vw - 44px)) - 14px) / 8 * 0.72);
+                height: calc((min(400px, calc(100vw - 44px)) - 14px) / 8 * 0.72);
+            }
+
+            /* --- Connect Four --- */
+            #c4-board {
+                max-width: min(420px, calc(100vw - 32px));
+            }
+
+            /* --- Minesweeper --- */
+            #mines-board {
+                max-width: min(360px, calc(100vw - 32px));
+            }
+
+            .mine-cell {
+                font-size: .85rem;
+            }
+
+            /* --- Hanoi --- */
+            .hanoi-pegs {
+                gap: 8px;
+                max-width: 100%;
+            }
+
+            .hanoi-peg {
+                min-height: 180px;
+            }
+
+            .hanoi-disc {
+                height: 22px;
+            }
+
+            /* --- RPS --- */
+            .rps-choices button {
+                width: 76px;
+                height: 76px;
+                font-size: 1.8rem;
+            }
+
+            .rps-arena {
+                font-size: 2.2rem;
+                gap: 18px;
+            }
+
+            /* --- Blackjack --- */
+            .bj-card {
+                width: 58px;
+                height: 82px;
+                font-size: 1.1rem;
+            }
+
+            .bj-card .corner {
+                font-size: .55rem;
+                top: 3px;
+                left: 4px;
+            }
+
+            /* --- Reaction Timer --- */
+            .reaction-stop-btn {
+                width: 140px;
+                height: 140px;
+                font-size: 1.2rem;
+                border-width: 5px;
+            }
+
+            /* --- Dice Duel --- */
+            .dd-die {
+                width: 56px;
+                height: 56px;
+                font-size: 1.6rem;
+                border-radius: 10px;
+            }
+
+            .dd-turn-total {
+                font-size: .95rem;
+            }
+
+            .dd-actions .btn {
+                min-width: 90px;
+            }
+
+            /* --- D-pad (snake) --- */
+            .dpad {
+                grid-template-columns: repeat(3, 42px);
+                grid-template-rows: repeat(3, 42px);
+                gap: 4px;
+            }
+
+            /* --- Footer --- */
+            footer {
+                padding: 18px 12px;
+                font-size: .72rem;
+            }
+        }
+
+        /* Extra-small phones (≤ 380px) */
+        @media (max-width: 380px) {
+            .board {
+                grid-template-columns: 1fr;
+                padding: 14px 10px;
+                gap: 16px;
+            }
+
+            .game-card {
+                padding: 16px 10px 20px;
+            }
+
+            /* Sea Battle — even smaller cells */
+            .sea-cell {
+                width: calc((100vw - 60px) / 8);
+                height: calc((100vw - 60px) / 8);
+                font-size: .7rem;
+            }
+
+            /* Reversi */
+            .rv-cell {
+                width: calc((100vw - 50px) / 8);
+                height: calc((100vw - 50px) / 8);
+            }
+
+            .rv-disc {
+                width: calc((100vw - 50px) / 8 * 0.7);
+                height: calc((100vw - 50px) / 8 * 0.7);
+            }
+
+            /* Checkers — tighten piece chrome */
+            .ck-piece {
+                border-width: 2px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, .3), inset 0 1px 3px rgba(255, 255, 255, .15);
+            }
+
+            /* RPS */
+            .rps-choices button {
+                width: 64px;
+                height: 64px;
+                font-size: 1.5rem;
+            }
+
+            /* Hanoi */
+            .hanoi-peg {
+                min-height: 150px;
+            }
+
+            .hanoi-disc {
+                height: 18px;
+                border-radius: 9px;
+            }
+
+            /* Dice Duel */
+            .dd-die {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+            }
+
+            /* Blackjack */
+            .bj-card {
+                width: 48px;
+                height: 70px;
+                font-size: .95rem;
+                border-radius: 6px;
+            }
+
+            /* Reaction */
+            .reaction-stop-btn {
+                width: 120px;
+                height: 120px;
+                font-size: 1rem;
+            }
+
+            /* Minesweeper */
+            .mine-cell {
+                font-size: .75rem;
             }
         }
     </style>
@@ -1510,7 +2126,7 @@
     </div>
 
     <section class="hero" id="homeHero">
-        <span class="eyebrow">Nineteen games • One table </span>
+        <span class="eyebrow">Interesting games • One table </span>
         <h2>Pull up a chair for <em>game night.</em></h2>
         <p>Pick a box off the shelf. Every game keeps score right here at the table — no accounts, no installs, just
             play.</p>
@@ -1697,6 +2313,57 @@
             <p>Outflank and flip the house&#8217;s discs. Control the board when the last square fills.</p>
             <span class="tag">1 player vs house · strategy</span>
             <span class="added">Added on 02-08-26</span>
+        </button>
+
+        <button class="card" data-game="tower">
+            <span class="new-badge">New</span>
+            <span class="pin"></span>
+            <span class="glyph">🏗️</span>
+            <h3>Stack Tower</h3>
+            <p>Time your tap to stack each block. Miss the edge and the tower gets thinner — how high can you go?</p>
+            <span class="tag">Solo · precision</span>
+            <span class="added">Added on 05-08-26</span>
+        </button>
+
+        <button class="card" data-game="reaction">
+            <span class="new-badge">New</span>
+            <span class="pin"></span>
+            <span class="glyph">⏱️</span>
+            <h3>Reaction Timer</h3>
+            <p>A random time flashes on screen. Stop the ticking clock at exactly that moment to win.</p>
+            <span class="tag">Solo · reflexes</span>
+            <span class="added">Added on 05-08-26</span>
+        </button>
+
+        <button class="card" data-game="invader">
+            <span class="new-badge">New</span>
+            <span class="pin"></span>
+            <span class="glyph">👾</span>
+            <h3>Space Invader</h3>
+            <p>Blast the alien fleet before they reach the ground. Move, shoot, survive — classic arcade action.</p>
+            <span class="tag">Solo · arcade</span>
+            <span class="added">Added on 05-08-26</span>
+        </button>
+
+        <button class="card" data-game="meteor">
+            <span class="new-badge">New</span>
+            <span class="pin"></span>
+            <span class="glyph">☄️</span>
+            <h3>Meteor Dodge</h3>
+            <p>Weave through an endless asteroid storm. Collect stars, dodge rocks — how far can you survive?</p>
+            <span class="tag">Solo · endless</span>
+            <span class="added">Added on 05-08-26</span>
+        </button>
+
+        <button class="card" data-game="diceduel">
+            <span class="new-badge">New</span>
+            <span class="pin"></span>
+            <span class="glyph">🎲</span>
+            <h3>Dice Duel</h3>
+            <p>Roll the dice and press your luck. Bank your points or risk it all — but roll a 1 and you lose the turn!
+            </p>
+            <span class="tag">1 player vs house · luck</span>
+            <span class="added">Added on 05-08-26</span>
         </button>
     </main>
 
@@ -2086,7 +2753,140 @@
         </div>
     </section>
 
-    <footer>Game Night © 2025 • Shashwat Saini — Built for one long evening at the table.</footer>
+    <!-- ================= STACK TOWER ================= -->
+    <section class="game-view" id="view-tower" hidden>
+        <div class="game-card">
+            <h2>🏗️ Stack Tower</h2>
+            <p class="sub">Click or tap to drop the sliding block. Overhangs get sliced off — keep the stack wide and
+                climb high.</p>
+            <div class="stat-line">
+                <span>Score: <b id="tower-score">0</b></span>
+                <span>Best: <b id="tower-best">0</b></span>
+            </div>
+            <div class="controls-row">
+                <button class="btn" id="tower-reset">New tower</button>
+            </div>
+            <div id="tower-wrap">
+                <canvas id="tower-canvas" width="360" height="480"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= REACTION TIMER ================= -->
+    <section class="game-view" id="view-reaction" hidden>
+        <div class="game-card">
+            <h2>⏱️ Reaction Timer</h2>
+            <p class="sub">A random target time appears. Hit the big button the instant the clock matches it. Within
+                50ms to win!</p>
+            <div class="stat-line">
+                <span>Round: <b id="reaction-round">0</b>/5</span>
+                <span>Hits: <b id="reaction-hits">0</b></span>
+                <span>Best streak: <b id="reaction-streak">0</b></span>
+            </div>
+            <div class="controls-row">
+                <button class="btn" id="reaction-start">Start</button>
+                <button class="btn secondary" id="reaction-reset">Reset</button>
+            </div>
+            <div class="reaction-display">
+                <div class="reaction-target" id="reaction-target">
+                    <span class="label">Stop at</span>
+                    <span id="reaction-target-time">—</span>
+                </div>
+                <div class="reaction-running" id="reaction-clock">0.000s</div>
+                <div class="reaction-bar-container" id="reaction-bar-box" style="display:none;">
+                    <div class="reaction-bar-fill" id="reaction-bar-fill"></div>
+                    <div class="reaction-bar-marker" id="reaction-bar-marker"></div>
+                </div>
+                <button class="reaction-stop-btn" id="reaction-stop" disabled>STOP</button>
+                <div class="reaction-result-text" id="reaction-msg"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= SPACE INVADER ================= -->
+    <section class="game-view" id="view-invader" hidden>
+        <div class="game-card">
+            <h2>👾 Space Invader</h2>
+            <p class="sub">Arrow keys or the pad below to move. Space bar or the fire button to shoot. Clear each wave!
+            </p>
+            <div class="stat-line">
+                <span>Score: <b id="invader-score">0</b></span>
+                <span>Lives: <b id="invader-lives">3</b></span>
+                <span>Wave: <b id="invader-wave">1</b></span>
+                <span>Best: <b id="invader-best">0</b></span>
+            </div>
+            <div class="controls-row">
+                <button class="btn" id="invader-reset">New game</button>
+            </div>
+            <div id="invader-wrap">
+                <canvas id="invader-canvas" width="400" height="460"></canvas>
+            </div>
+            <div class="invader-controls">
+                <button id="inv-left">←</button>
+                <button id="inv-fire">🔥</button>
+                <button id="inv-right">→</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= METEOR DODGE ================= -->
+    <section class="game-view" id="view-meteor" hidden>
+        <div class="game-card">
+            <h2>☄️ Meteor Dodge</h2>
+            <p class="sub">Arrow keys or tap the sides to dodge. Collect ⭐ stars for bonus points. Survive as long as
+                you can!</p>
+            <div class="stat-line">
+                <span>Score: <b id="meteor-score">0</b></span>
+                <span>Best: <b id="meteor-best">0</b></span>
+            </div>
+            <div class="controls-row">
+                <button class="btn" id="meteor-reset">New run</button>
+            </div>
+            <div id="meteor-wrap">
+                <canvas id="meteor-canvas" width="360" height="500"></canvas>
+            </div>
+            <div class="meteor-controls">
+                <button id="mt-left">←</button>
+                <button id="mt-right">→</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= DICE DUEL ================= -->
+    <section class="game-view" id="view-diceduel" hidden>
+        <div class="game-card">
+            <h2>🎲 Dice Duel</h2>
+            <p class="sub">Roll the dice to stack points — but if you roll a 1, you lose the turn! Bank to keep your
+                points safe. First to 100 wins.</p>
+            <div class="stat-line">
+                <span>You: <b id="dd-player-score">0</b></span>
+                <span>House: <b id="dd-house-score">0</b></span>
+                <span>Wins: <b id="dd-wins">0</b></span>
+            </div>
+            <div class="dd-arena">
+                <div class="dd-score-bar">
+                    <div class="dd-bar-player" id="dd-bar-player" style="width:0%"></div>
+                    <div class="dd-bar-house" id="dd-bar-house" style="width:0%"></div>
+                </div>
+                <div class="dd-dice-area" id="dd-dice-area">
+                    <div class="dd-die" id="dd-die1">–</div>
+                    <div class="dd-die" id="dd-die2">–</div>
+                </div>
+                <div class="dd-turn-total" id="dd-turn-total">Roll to begin!</div>
+                <div class="dd-actions" id="dd-actions">
+                    <button class="btn" id="dd-roll">🎲 Roll</button>
+                    <button class="btn" id="dd-bank" disabled>💰 Bank</button>
+                    <button class="btn" id="dd-reset">New game</button>
+                </div>
+                <div class="dd-log" id="dd-log"></div>
+            </div>
+            <div id="dd-msg"
+                style="text-align:center; margin-top:14px; font-weight:600; color:var(--brass-light); min-height:1.4em;">
+            </div>
+        </div>
+    </section>
+
+    <footer>Game Night © 2026 • Shashwat Saini — Built for one long evening at the table.</footer>
 
     <script>
         /* ============================================================
@@ -2116,6 +2916,11 @@
             checkers: document.getElementById('view-checkers'),
             blackjack: document.getElementById('view-blackjack'),
             reversi: document.getElementById('view-reversi'),
+            tower: document.getElementById('view-tower'),
+            reaction: document.getElementById('view-reaction'),
+            invader: document.getElementById('view-invader'),
+            meteor: document.getElementById('view-meteor'),
+            diceduel: document.getElementById('view-diceduel'),
         };
         let played = 0, wins = 0;
         const tallyPlayed = document.getElementById('tally-played');
@@ -2148,6 +2953,11 @@
             if (id === 'checkers' && !checkersStarted) { initCheckers(); }
             if (id === 'blackjack' && !bjStarted) { initBlackjack(); }
             if (id === 'reversi' && !reversiStarted) { initReversi(); }
+            if (id === 'tower' && !towerStarted) { initTower(); }
+            if (id === 'reaction' && !reactionStarted) { initReaction(); }
+            if (id === 'invader' && !invaderStarted) { initInvader(); }
+            if (id === 'meteor' && !meteorStarted) { initMeteor(); }
+            if (id === 'diceduel' && !diceduelStarted) { initDiceDuel(); }
         }
         function goHome() {
             homeHero.style.display = '';
@@ -3409,7 +4219,9 @@
                 newWind(); draw();
             }
             function newWind() {
-                wind = (Math.random() - 0.5) * 500;
+                wind = Math.random() < 0.5
+                    ? -(Math.random() * 150 + 50)
+                    : Math.random() * 150 + 50;
                 const dir = wind >= 0 ? '→' : '←';
                 windEl.textContent = 'Wind: ' + Math.abs(wind).toFixed(1) + ' ' + dir;
             }
@@ -3703,7 +4515,9 @@
                     msgEl.textContent = 'Place ship of length ' + SHIPS[placeIdx];
                 }
                 renderPlayerGrid();
+                renderEnemyGrid(); // re-render so click listeners match current phase
             }
+
             function playerFire2(r, c) {
                 if (phase !== 'battle') return;
                 if (eHitBoard[r][c] === 1) return;
@@ -4240,6 +5054,1296 @@
                 render();
             }
             resetBtn.addEventListener('click', reset);
+            reset();
+        }
+
+        /* ============================================================
+           STACK TOWER
+           ============================================================ */
+        let towerStarted = false;
+        let towerBestScore = 0;
+        function initTower() {
+            towerStarted = true;
+            const canvas = document.getElementById('tower-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('tower-score');
+            const bestEl = document.getElementById('tower-best');
+            const resetBtn = document.getElementById('tower-reset');
+            const W = canvas.width, H = canvas.height;
+            const BLOCK_H = 24;
+            const COLORS = [
+                '#e04a60', '#e0bf4f', '#3ea36b', '#3b74b0',
+                '#d9783b', '#9b59b6', '#1abc9c', '#e67e22',
+                '#c0435a', '#2ecc71', '#3498db', '#f39c12'
+            ];
+            const GRAVITY = 0.45;
+            let stack, currentBlock, speed, dir, gameOver, animFrame, cameraY, targetCameraY;
+            // Falling debris pieces (cut-off overhangs)
+            let debris;
+            // State: 'sliding' = block moving left/right, 'dropping' = block falling to landing row, 'idle' (shouldn't happen much)
+            let phase;
+
+            function reset() {
+                cancelAnimationFrame(animFrame);
+                stack = [{ x: W / 2 - 60, w: 120, y: H - BLOCK_H }];
+                speed = 1.3;
+                dir = 1;
+                gameOver = false;
+                cameraY = 0;
+                targetCameraY = 0;
+                debris = [];
+                phase = 'sliding';
+                scoreEl.textContent = '0';
+                spawnBlock();
+                loop();
+            }
+            function spawnBlock() {
+                const top = stack[stack.length - 1];
+                const landingY = top.y - BLOCK_H;
+                const HOVER_DISTANCE = 100;
+                currentBlock = {
+                    x: 0,
+                    w: top.w,
+                    y: landingY - HOVER_DISTANCE, // hovers 100px above landing row
+                    landingY: landingY,
+                    vy: 0,
+                    settled: false
+                };
+                dir = 1;
+                phase = 'sliding';
+            }
+            function dropBlock() {
+                if (gameOver || !currentBlock || phase !== 'sliding') return;
+                phase = 'dropping';
+                currentBlock.vy = 0;
+            }
+            function landBlock() {
+                // Block has reached landing row — do the overlap calculation
+                const top = stack[stack.length - 1];
+                const curr = currentBlock;
+                curr.y = curr.landingY;
+                // Calculate overlap
+                const overlapStart = Math.max(curr.x, top.x);
+                const overlapEnd = Math.min(curr.x + curr.w, top.x + top.w);
+                const overlapW = overlapEnd - overlapStart;
+                if (overlapW <= 0) {
+                    // Missed completely — the whole block falls as debris
+                    debris.push({
+                        x: curr.x,
+                        y: curr.y,
+                        w: curr.w,
+                        vy: 2,
+                        vx: dir * 1.5,
+                        rot: 0,
+                        rotSpeed: (Math.random() - 0.5) * 0.08,
+                        color: COLORS[stack.length % COLORS.length]
+                    });
+                    gameOver = true;
+                    const sc = stack.length - 1;
+                    if (sc > towerBestScore) { towerBestScore = sc; bestEl.textContent = towerBestScore; }
+                    if (sc > 0) recordRound(sc >= 10);
+                    phase = 'sliding'; // stop dropping
+                    return;
+                }
+                // Perfect placement bonus — if overlap is very close to the full width
+                const isPerfect = Math.abs(overlapW - top.w) < 3;
+                const finalW = isPerfect ? top.w : overlapW;
+                const finalX = isPerfect ? top.x : overlapStart;
+
+                // Spawn debris for the cut-off overhang
+                if (!isPerfect) {
+                    const cutColor = COLORS[stack.length % COLORS.length];
+                    // Left overhang
+                    if (curr.x < top.x) {
+                        const dw = top.x - curr.x;
+                        if (dw > 1) {
+                            debris.push({
+                                x: curr.x,
+                                y: curr.y,
+                                w: dw,
+                                vy: 0.5,
+                                vx: -1.5 - Math.random(),
+                                rot: 0,
+                                rotSpeed: -0.03 - Math.random() * 0.06,
+                                color: cutColor
+                            });
+                        }
+                    }
+                    // Right overhang
+                    if (curr.x + curr.w > top.x + top.w) {
+                        const dw = (curr.x + curr.w) - (top.x + top.w);
+                        if (dw > 1) {
+                            debris.push({
+                                x: top.x + top.w,
+                                y: curr.y,
+                                w: dw,
+                                vy: 0.5,
+                                vx: 1.5 + Math.random(),
+                                rot: 0,
+                                rotSpeed: 0.03 + Math.random() * 0.06,
+                                color: cutColor
+                            });
+                        }
+                    }
+                }
+
+                // Add the overlapping (or perfect) block to the stack
+                stack.push({ x: finalX, w: finalW, y: curr.landingY });
+                const sc = stack.length - 1;
+                scoreEl.textContent = sc;
+                // Increase speed
+                speed = Math.min(1.3 + sc * 0.15, 8);
+                // Scroll camera when stack gets tall
+                if (H - curr.landingY + targetCameraY > H * 0.55) {
+                    targetCameraY += BLOCK_H;
+                }
+                phase = 'sliding';
+                spawnBlock();
+            }
+            function loop() {
+                update();
+                draw();
+                if (!gameOver || debris.length > 0) {
+                    animFrame = requestAnimationFrame(loop);
+                }
+            }
+            function update() {
+                // Smooth camera scroll
+                if (cameraY < targetCameraY) {
+                    cameraY += (targetCameraY - cameraY) * 0.1;
+                    if (Math.abs(cameraY - targetCameraY) < 0.5) cameraY = targetCameraY;
+                }
+                if (gameOver && debris.length === 0) return;
+                // Update current block
+                if (currentBlock && !gameOver) {
+                    if (phase === 'sliding') {
+                        // Horizontal movement while hovering above
+                        currentBlock.x += speed * dir;
+                        if (currentBlock.x + currentBlock.w >= W) { dir = -1; currentBlock.x = W - currentBlock.w; }
+                        if (currentBlock.x <= 0) { dir = 1; currentBlock.x = 0; }
+                    } else if (phase === 'dropping') {
+                        // Falls down smoothly to landingY on click with lower speed
+                        currentBlock.vy += 0.12;
+                        currentBlock.y += currentBlock.vy;
+                        if (currentBlock.y >= currentBlock.landingY) {
+                            currentBlock.y = currentBlock.landingY;
+                            landBlock();
+                        }
+                    }
+                }
+                // Update debris
+                for (let i = debris.length - 1; i >= 0; i--) {
+                    const d = debris[i];
+                    d.vy += GRAVITY;
+                    d.y += d.vy;
+                    d.x += d.vx;
+                    d.rot += d.rotSpeed;
+                    // Remove if fallen way below canvas
+                    if (d.y - cameraY > H + 100) {
+                        debris.splice(i, 1);
+                    }
+                }
+            }
+            function drawBlock(x, y, w, color, alpha) {
+                ctx.globalAlpha = alpha || 1;
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, w, BLOCK_H - 2);
+                // Top shine
+                ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                ctx.fillRect(x, y, w, 6);
+                // Bottom shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(x, y + BLOCK_H - 4, w, 2);
+                ctx.globalAlpha = 1;
+            }
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                // Sky gradient that shifts with height
+                const grad = ctx.createLinearGradient(0, 0, 0, H);
+                const heightFactor = Math.min(cameraY / 600, 1);
+                const r1 = Math.round(10 + heightFactor * 10);
+                const g1 = Math.round(30 + heightFactor * 5);
+                const b1 = Math.round(20 - heightFactor * 10);
+                grad.addColorStop(0, `rgb(${r1},${g1},${b1})`);
+                grad.addColorStop(1, '#1b4332');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+                ctx.save();
+                ctx.translate(0, cameraY);
+                // Draw stacked blocks
+                stack.forEach((blk, i) => {
+                    drawBlock(blk.x, blk.y, blk.w, COLORS[i % COLORS.length]);
+                });
+                // Draw current sliding/dropping block
+                if (currentBlock && !gameOver) {
+                    const ci = stack.length % COLORS.length;
+                    drawBlock(currentBlock.x, currentBlock.y, currentBlock.w, COLORS[ci]);
+                }
+                // Draw debris (falling cut-off pieces)
+                debris.forEach(d => {
+                    ctx.save();
+                    const cx = d.x + d.w / 2;
+                    const cy = d.y + (BLOCK_H - 2) / 2;
+                    ctx.translate(cx, cy);
+                    ctx.rotate(d.rot);
+                    // Fade out as it falls
+                    const distBelow = d.y - (stack[stack.length - 1].y);
+                    const fadeAlpha = Math.max(0.15, 1 - distBelow / 300);
+                    drawBlock(-d.w / 2, -(BLOCK_H - 2) / 2, d.w, d.color, fadeAlpha);
+                    ctx.restore();
+                });
+                ctx.restore();
+                if (gameOver) {
+                    ctx.fillStyle = 'rgba(0,0,0,.55)';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#f5efe0';
+                    ctx.font = '600 22px Space Grotesk, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Tower collapsed!', W / 2, H / 2 - 10);
+                    ctx.font = '400 15px Space Grotesk, sans-serif';
+                    ctx.fillText('Score: ' + (stack.length - 1), W / 2, H / 2 + 18);
+                }
+            }
+            canvas.addEventListener('click', dropBlock);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); dropBlock(); });
+            window.addEventListener('keydown', (e) => {
+                if (activeGame !== 'tower') return;
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); dropBlock(); }
+            });
+            resetBtn.addEventListener('click', reset);
+            reset();
+        }
+
+        /* ============================================================
+           REACTION TIMER
+           ============================================================ */
+        let reactionStarted = false;
+        let reactionBestStreak = 0;
+        function initReaction() {
+            reactionStarted = true;
+            const startBtn = document.getElementById('reaction-start');
+            const resetBtnR = document.getElementById('reaction-reset');
+            const stopBtn = document.getElementById('reaction-stop');
+            const targetTimeEl = document.getElementById('reaction-target-time');
+            const clockEl = document.getElementById('reaction-clock');
+            const msgEl = document.getElementById('reaction-msg');
+            const roundEl = document.getElementById('reaction-round');
+            const hitsEl = document.getElementById('reaction-hits');
+            const streakEl = document.getElementById('reaction-streak');
+            const barBox = document.getElementById('reaction-bar-box');
+            const barFill = document.getElementById('reaction-bar-fill');
+            const barMarker = document.getElementById('reaction-bar-marker');
+
+            const TOTAL_ROUNDS = 5;
+            const WIN_THRESHOLD_MS = 50;
+            const MAX_TIME_MS = 5000; // Timer runs up to 5 seconds
+            let targetMs, startTime, rafId, running, currentRound, hits, streak;
+
+            function genTarget() {
+                // Random target between 1.000s and 4.500s
+                const ms = Math.floor(Math.random() * 3500) + 1000;
+                return ms;
+            }
+            function formatTime(ms) {
+                const s = Math.floor(ms / 1000);
+                const frac = String(ms % 1000).padStart(3, '0');
+                return s + '.' + frac + 's';
+            }
+            function fullReset() {
+                cancelAnimationFrame(rafId);
+                running = false;
+                currentRound = 0;
+                hits = 0;
+                streak = 0;
+                roundEl.textContent = '0';
+                hitsEl.textContent = '0';
+                targetTimeEl.textContent = '\u2014';
+                clockEl.textContent = '0.000s';
+                clockEl.className = 'reaction-running';
+                msgEl.textContent = '';
+                stopBtn.disabled = true;
+                barBox.style.display = 'none';
+                startBtn.disabled = false;
+            }
+            function startRound() {
+                if (currentRound >= TOTAL_ROUNDS) {
+                    // Game over
+                    const won = hits >= 3;
+                    msgEl.textContent = won
+                        ? '\u{1F389} You nailed ' + hits + '/' + TOTAL_ROUNDS + ' \u2014 sharp reflexes!'
+                        : 'Only ' + hits + '/' + TOTAL_ROUNDS + ' hits. Try again!';
+                    recordRound(won);
+                    if (streak > reactionBestStreak) { reactionBestStreak = streak; streakEl.textContent = reactionBestStreak; }
+                    stopBtn.disabled = true;
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Play again';
+                    return;
+                }
+                currentRound++;
+                roundEl.textContent = currentRound;
+                targetMs = genTarget();
+                targetTimeEl.textContent = formatTime(targetMs);
+                clockEl.textContent = '0.000s';
+                clockEl.className = 'reaction-running';
+                msgEl.textContent = '';
+                // Show bar
+                barBox.style.display = '';
+                barFill.style.width = '0%';
+                barMarker.style.left = (targetMs / MAX_TIME_MS * 100) + '%';
+                // Delay start by random 0.5-1.5s to prevent anticipation
+                stopBtn.disabled = true;
+                const delay = Math.floor(Math.random() * 1000) + 500;
+                setTimeout(() => {
+                    if (activeGame !== 'reaction') return;
+                    running = true;
+                    startTime = performance.now();
+                    stopBtn.disabled = false;
+                    tick();
+                }, delay);
+            }
+            function tick() {
+                if (!running) return;
+                const elapsed = performance.now() - startTime;
+                const ms = Math.min(Math.floor(elapsed), MAX_TIME_MS);
+                clockEl.textContent = formatTime(ms);
+                barFill.style.width = (ms / MAX_TIME_MS * 100) + '%';
+                // Color feedback
+                const diff = Math.abs(ms - targetMs);
+                if (diff < 200) clockEl.className = 'reaction-running close';
+                else clockEl.className = 'reaction-running';
+                if (ms >= MAX_TIME_MS) {
+                    // Time ran out
+                    running = false;
+                    stopBtn.disabled = true;
+                    clockEl.className = 'reaction-running miss';
+                    msgEl.textContent = '\u23F0 Time ran out! You missed this one.';
+                    streak = 0;
+                    setTimeout(startRound, 1400);
+                    return;
+                }
+                rafId = requestAnimationFrame(tick);
+            }
+            function stopTimer() {
+                if (!running) return;
+                running = false;
+                cancelAnimationFrame(rafId);
+                const elapsed = performance.now() - startTime;
+                const stoppedMs = Math.floor(elapsed);
+                clockEl.textContent = formatTime(stoppedMs);
+                const diff = Math.abs(stoppedMs - targetMs);
+                if (diff <= WIN_THRESHOLD_MS) {
+                    hits++;
+                    streak++;
+                    hitsEl.textContent = hits;
+                    clockEl.className = 'reaction-running hit';
+                    msgEl.textContent = '\u2705 Hit! Off by only ' + diff + 'ms';
+                } else {
+                    clockEl.className = 'reaction-running miss';
+                    msgEl.textContent = '\u274C Missed by ' + diff + 'ms (need \u226450ms)';
+                    streak = 0;
+                }
+                stopBtn.disabled = true;
+                setTimeout(startRound, 1600);
+            }
+            startBtn.addEventListener('click', () => {
+                currentRound = 0;
+                hits = 0;
+                streak = 0;
+                roundEl.textContent = '0';
+                hitsEl.textContent = '0';
+                msgEl.textContent = '';
+                startBtn.disabled = true;
+                startRound();
+            });
+            stopBtn.addEventListener('click', stopTimer);
+            window.addEventListener('keydown', (e) => {
+                if (activeGame !== 'reaction') return;
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); stopTimer(); }
+            });
+            resetBtnR.addEventListener('click', fullReset);
+            fullReset();
+        }
+
+        /* ============================================================
+           SPACE INVADER
+           ============================================================ */
+        let invaderStarted = false;
+        let invaderBestScore = 0;
+        function initInvader() {
+            invaderStarted = true;
+            const canvas = document.getElementById('invader-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('invader-score');
+            const livesEl = document.getElementById('invader-lives');
+            const waveEl = document.getElementById('invader-wave');
+            const bestEl = document.getElementById('invader-best');
+            const resetBtn = document.getElementById('invader-reset');
+            const W = canvas.width, H = canvas.height;
+            // Player
+            const PW = 36, PH = 20;
+            let px, bullets, lives, score, wave, gameOver, animFrame;
+            // Invaders
+            let invaders, invDir, invSpeed, invDropNext, invBullets, invShootTimer;
+            // Controls
+            let leftDown = false, rightDown = false, spaceDown = false;
+            let shootCooldown = 0;
+
+            const INV_ROWS = 4, INV_COLS = 8;
+            const IW = 28, IH = 20, IGAP_X = 12, IGAP_Y = 10;
+            const INVADER_SHAPES = [
+                // Row type 0 — classic squid
+                [0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0],
+                // Row type 1 — crab
+                [1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+                // Row type 2 — jellyfish
+                [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0],
+                // Row type 3 — heavy
+                [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+            ];
+
+            function createInvaders() {
+                invaders = [];
+                const startX = (W - (INV_COLS * (IW + IGAP_X) - IGAP_X)) / 2;
+                for (let r = 0; r < INV_ROWS; r++) {
+                    for (let c = 0; c < INV_COLS; c++) {
+                        invaders.push({
+                            x: startX + c * (IW + IGAP_X),
+                            y: 40 + r * (IH + IGAP_Y),
+                            alive: true,
+                            row: r
+                        });
+                    }
+                }
+                invDir = 1;
+                invSpeed = 0.1 + wave * 0.2;
+                invDropNext = false;
+                invBullets = [];
+                invShootTimer = 0;
+            }
+            function reset() {
+                cancelAnimationFrame(animFrame);
+                px = W / 2 - PW / 2;
+                bullets = [];
+                lives = 3;
+                score = 0;
+                wave = 1;
+                gameOver = false;
+                scoreEl.textContent = '0';
+                livesEl.textContent = '3';
+                waveEl.textContent = '1';
+                createInvaders();
+                loop();
+            }
+            function playerShoot() {
+                if (gameOver) return;
+                // Max 3 bullets on screen
+                if (bullets.length >= 3) return;
+                bullets.push({ x: px + PW / 2 - 2, y: H - 40, w: 4, h: 10 });
+            }
+            function loop() {
+                if (gameOver) { draw(); return; }
+                update();
+                draw();
+                animFrame = requestAnimationFrame(loop);
+            }
+            function update() {
+                // Move player
+                if (leftDown) px = Math.max(0, px - 4);
+                if (rightDown) px = Math.min(W - PW, px + 4);
+                // Continuous shooting while Space is held
+                if (spaceDown) {
+                    if (shootCooldown <= 0) {
+                        playerShoot();
+                        shootCooldown = 12; // fire every 12 frames (~5 shots/sec at 60fps)
+                    } else {
+                        shootCooldown--;
+                    }
+                }
+                // Move player bullets
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    bullets[i].y -= 6;
+                    if (bullets[i].y + bullets[i].h < 0) { bullets.splice(i, 1); continue; }
+                    // Check collision with invaders
+                    for (let j = 0; j < invaders.length; j++) {
+                        const inv = invaders[j];
+                        if (!inv.alive) continue;
+                        if (bullets[i] &&
+                            bullets[i].x < inv.x + IW &&
+                            bullets[i].x + bullets[i].w > inv.x &&
+                            bullets[i].y < inv.y + IH &&
+                            bullets[i].y + bullets[i].h > inv.y) {
+                            inv.alive = false;
+                            bullets.splice(i, 1);
+                            score += (INV_ROWS - inv.row) * 10;
+                            scoreEl.textContent = score;
+                            break;
+                        }
+                    }
+                }
+                // Check wave clear
+                if (invaders.every(inv => !inv.alive)) {
+                    wave++;
+                    waveEl.textContent = wave;
+                    createInvaders();
+                    return;
+                }
+                // Move invaders
+                let hitEdge = false;
+                const aliveInvaders = invaders.filter(inv => inv.alive);
+                if (invDropNext) {
+                    invaders.forEach(inv => { if (inv.alive) inv.y += IH; });
+                    invDir *= -1;
+                    invDropNext = false;
+                    invSpeed = Math.min(invSpeed + 0.1, 4);
+                } else {
+                    invaders.forEach(inv => {
+                        if (!inv.alive) return;
+                        inv.x += invSpeed * invDir;
+                        if (inv.x + IW >= W || inv.x <= 0) hitEdge = true;
+                    });
+                    if (hitEdge) invDropNext = true;
+                }
+                // Check invaders reaching bottom
+                for (const inv of aliveInvaders) {
+                    if (inv.y + IH >= H - 30) {
+                        gameOver = true;
+                        endGame();
+                        return;
+                    }
+                }
+                // Invader shooting
+                invShootTimer++;
+                const shootInterval = Math.max(30, 80 - wave * 8);
+                if (invShootTimer >= shootInterval) {
+                    invShootTimer = 0;
+                    // Pick a random alive bottom invader per column
+                    const columns = {};
+                    aliveInvaders.forEach(inv => {
+                        const col = Math.round(inv.x);
+                        if (!columns[col] || inv.y > columns[col].y) columns[col] = inv;
+                    });
+                    const bottomInvaders = Object.values(columns);
+                    if (bottomInvaders.length > 0) {
+                        const shooter = bottomInvaders[Math.floor(Math.random() * bottomInvaders.length)];
+                        invBullets.push({ x: shooter.x + IW / 2 - 2, y: shooter.y + IH, w: 4, h: 10 });
+                    }
+                }
+                // Move invader bullets
+                for (let i = invBullets.length - 1; i >= 0; i--) {
+                    invBullets[i].y += 3.5;
+                    if (invBullets[i].y > H) { invBullets.splice(i, 1); continue; }
+                    // Check collision with player
+                    const b = invBullets[i];
+                    if (b && b.x < px + PW && b.x + b.w > px && b.y < H - 20 && b.y + b.h > H - 20 - PH) {
+                        invBullets.splice(i, 1);
+                        lives--;
+                        livesEl.textContent = lives;
+                        if (lives <= 0) {
+                            gameOver = true;
+                            endGame();
+                            return;
+                        }
+                    }
+                }
+            }
+            function endGame() {
+                if (score > invaderBestScore) { invaderBestScore = score; bestEl.textContent = invaderBestScore; }
+                recordRound(score >= 100);
+            }
+            function drawInvader(x, y, row) {
+                const shape = INVADER_SHAPES[row % INVADER_SHAPES.length];
+                const cellW = IW / 6;
+                const cellH = IH / 4;
+                const colors = ['#3ea36b', '#e0bf4f', '#e04a60', '#3b74b0'];
+                ctx.fillStyle = colors[row % colors.length];
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 6; c++) {
+                        if (shape[r * 6 + c]) {
+                            ctx.fillRect(x + c * cellW, y + r * cellH, cellW - 1, cellH - 1);
+                        }
+                    }
+                }
+            }
+            function draw() {
+                // Background — deep space
+                ctx.fillStyle = '#050d18';
+                ctx.fillRect(0, 0, W, H);
+                // Stars
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                for (let i = 0; i < 40; i++) {
+                    const sx = (i * 97 + 13) % W;
+                    const sy = (i * 53 + 7) % H;
+                    ctx.fillRect(sx, sy, 1.5, 1.5);
+                }
+                // Draw invaders
+                invaders.forEach(inv => {
+                    if (!inv.alive) return;
+                    drawInvader(inv.x, inv.y, inv.row);
+                });
+                // Draw player ship
+                ctx.fillStyle = '#e0bf4f';
+                ctx.beginPath();
+                ctx.moveTo(px + PW / 2, H - 20 - PH);
+                ctx.lineTo(px, H - 20);
+                ctx.lineTo(px + PW, H - 20);
+                ctx.closePath();
+                ctx.fill();
+                // Cockpit
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(px + PW / 2 - 2, H - 20 - PH + 6, 4, 4);
+                // Draw player bullets
+                ctx.fillStyle = '#3ea36b';
+                bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+                // Draw invader bullets
+                ctx.fillStyle = '#e04a60';
+                invBullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+                // Lives display at bottom
+                ctx.fillStyle = 'rgba(245,239,224,0.4)';
+                ctx.font = '12px IBM Plex Mono, monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText('\u2764 '.repeat(lives), 10, H - 5);
+                if (gameOver) {
+                    ctx.fillStyle = 'rgba(0,0,0,.6)';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#f5efe0';
+                    ctx.font = '600 24px Space Grotesk, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Game Over', W / 2, H / 2 - 14);
+                    ctx.font = '400 15px Space Grotesk, sans-serif';
+                    ctx.fillText('Score: ' + score + '  \u2022  Wave: ' + wave, W / 2, H / 2 + 14);
+                }
+            }
+            // Keyboard controls
+            window.addEventListener('keydown', (e) => {
+                if (activeGame !== 'invader') return;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { leftDown = true; e.preventDefault(); }
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { rightDown = true; e.preventDefault(); }
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    if (!spaceDown) {
+                        // Fire immediately on first press
+                        playerShoot();
+                        shootCooldown = 12;
+                    }
+                    spaceDown = true;
+                }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftDown = false;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightDown = false;
+                if (e.key === ' ') { spaceDown = false; shootCooldown = 0; }
+            });
+            // Touch controls
+            document.getElementById('inv-left').addEventListener('mousedown', () => leftDown = true);
+            document.getElementById('inv-left').addEventListener('mouseup', () => leftDown = false);
+            document.getElementById('inv-left').addEventListener('mouseleave', () => leftDown = false);
+            document.getElementById('inv-left').addEventListener('touchstart', (e) => { e.preventDefault(); leftDown = true; });
+            document.getElementById('inv-left').addEventListener('touchend', () => leftDown = false);
+            document.getElementById('inv-right').addEventListener('mousedown', () => rightDown = true);
+            document.getElementById('inv-right').addEventListener('mouseup', () => rightDown = false);
+            document.getElementById('inv-right').addEventListener('mouseleave', () => rightDown = false);
+            document.getElementById('inv-right').addEventListener('touchstart', (e) => { e.preventDefault(); rightDown = true; });
+            document.getElementById('inv-right').addEventListener('touchend', () => rightDown = false);
+            document.getElementById('inv-fire').addEventListener('click', playerShoot);
+            document.getElementById('inv-fire').addEventListener('touchstart', (e) => { e.preventDefault(); playerShoot(); });
+            resetBtn.addEventListener('click', reset);
+            reset();
+        }
+
+        /* ============================================================
+           METEOR DODGE (Endless)
+           ============================================================ */
+        let meteorStarted = false;
+        function initMeteor() {
+            meteorStarted = true;
+            const canvas = document.getElementById('meteor-canvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            const scoreEl = document.getElementById('meteor-score');
+            const bestEl = document.getElementById('meteor-best');
+            const resetBtn = document.getElementById('meteor-reset');
+            let meteorBestScore = 0;
+
+            const SHIP_W = 24, SHIP_H = 30;
+            let shipX, shipY, meteors, stars, particles, score, speed, spawnTimer, gameOver, animFrame;
+            let leftDown = false, rightDown = false;
+
+            // Parallax star layers
+            const bgStars = [];
+            for (let i = 0; i < 80; i++) {
+                bgStars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    s: Math.random() * 1.5 + 0.5,
+                    speed: Math.random() * 0.5 + 0.2,
+                    brightness: Math.random() * 0.5 + 0.3
+                });
+            }
+
+            function reset() {
+                cancelAnimationFrame(animFrame);
+                shipX = W / 2;
+                shipY = H - 60;
+                meteors = [];
+                stars = [];
+                particles = [];
+                score = 0;
+                speed = 2;
+                spawnTimer = 0;
+                gameOver = false;
+                scoreEl.textContent = '0';
+                loop();
+            }
+
+            function spawnMeteor() {
+                const size = Math.random() * 20 + 12;
+                meteors.push({
+                    x: Math.random() * (W - size * 2) + size,
+                    y: -size,
+                    r: size,
+                    speed: speed * (Math.random() * 0.5 + 0.7),
+                    rot: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.08
+                });
+            }
+
+            function spawnStar() {
+                stars.push({
+                    x: Math.random() * (W - 20) + 10,
+                    y: -10,
+                    speed: speed * 0.6,
+                    pulse: 0
+                });
+            }
+
+            function addParticles(x, y, color, count) {
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x, y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        life: 1,
+                        color,
+                        size: Math.random() * 3 + 1
+                    });
+                }
+            }
+
+            function update() {
+                // Move ship
+                const shipSpeed = 5;
+                if (leftDown) shipX = Math.max(SHIP_W / 2, shipX - shipSpeed);
+                if (rightDown) shipX = Math.min(W - SHIP_W / 2, shipX + shipSpeed);
+
+                // Spawn
+                spawnTimer++;
+                const spawnRate = Math.max(12, 40 - Math.floor(score / 50));
+                if (spawnTimer >= spawnRate) {
+                    spawnMeteor();
+                    if (Math.random() < 0.15) spawnStar();
+                    spawnTimer = 0;
+                }
+
+                // Ramp difficulty
+                speed = 2 + score / 80;
+
+                // Move meteors
+                for (let i = meteors.length - 1; i >= 0; i--) {
+                    const m = meteors[i];
+                    m.y += m.speed;
+                    m.rot += m.rotSpeed;
+                    if (m.y - m.r > H) { meteors.splice(i, 1); score++; scoreEl.textContent = score; continue; }
+                    // Collision with ship
+                    const dx = m.x - shipX, dy = m.y - shipY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < m.r + 10) {
+                        gameOver = true;
+                        addParticles(shipX, shipY, '#e0bf4f', 30);
+                        addParticles(shipX, shipY, '#e04a60', 20);
+                        if (score > meteorBestScore) { meteorBestScore = score; bestEl.textContent = meteorBestScore; }
+                        recordRound(score >= 50);
+                        return;
+                    }
+                }
+
+                // Move stars (collectibles)
+                for (let i = stars.length - 1; i >= 0; i--) {
+                    const s = stars[i];
+                    s.y += s.speed;
+                    s.pulse += 0.1;
+                    if (s.y > H + 10) { stars.splice(i, 1); continue; }
+                    const dx = s.x - shipX, dy = s.y - shipY;
+                    if (Math.sqrt(dx * dx + dy * dy) < 18) {
+                        score += 10;
+                        scoreEl.textContent = score;
+                        addParticles(s.x, s.y, '#e0bf4f', 12);
+                        stars.splice(i, 1);
+                    }
+                }
+
+                // Move particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.025;
+                    if (p.life <= 0) particles.splice(i, 1);
+                }
+
+                // Move background stars
+                bgStars.forEach(s => {
+                    s.y += s.speed * speed * 0.3;
+                    if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
+                });
+            }
+
+            function drawShip(x, y) {
+                // Thruster glow
+                const glowGrad = ctx.createRadialGradient(x, y + 14, 0, x, y + 14, 18);
+                glowGrad.addColorStop(0, 'rgba(62, 163, 107, 0.6)');
+                glowGrad.addColorStop(1, 'rgba(62, 163, 107, 0)');
+                ctx.fillStyle = glowGrad;
+                ctx.fillRect(x - 18, y + 4, 36, 28);
+
+                // Thruster flame
+                ctx.fillStyle = '#3ea36b';
+                ctx.beginPath();
+                ctx.moveTo(x - 5, y + 12);
+                ctx.lineTo(x, y + 20 + Math.random() * 6);
+                ctx.lineTo(x + 5, y + 12);
+                ctx.fill();
+
+                // Ship body
+                ctx.fillStyle = '#e0bf4f';
+                ctx.beginPath();
+                ctx.moveTo(x, y - SHIP_H / 2);
+                ctx.lineTo(x - SHIP_W / 2, y + SHIP_H / 2);
+                ctx.lineTo(x + SHIP_W / 2, y + SHIP_H / 2);
+                ctx.closePath();
+                ctx.fill();
+
+                // Cockpit
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x, y - 2, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Wings
+                ctx.fillStyle = '#c9a227';
+                ctx.beginPath();
+                ctx.moveTo(x - SHIP_W / 2 - 4, y + SHIP_H / 2);
+                ctx.lineTo(x - SHIP_W / 2, y + 4);
+                ctx.lineTo(x - SHIP_W / 2 + 6, y + SHIP_H / 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(x + SHIP_W / 2 + 4, y + SHIP_H / 2);
+                ctx.lineTo(x + SHIP_W / 2, y + 4);
+                ctx.lineTo(x + SHIP_W / 2 - 6, y + SHIP_H / 2);
+                ctx.fill();
+            }
+
+            function draw() {
+                // Deep space background
+                const bg = ctx.createLinearGradient(0, 0, 0, H);
+                bg.addColorStop(0, '#08001a');
+                bg.addColorStop(0.5, '#0d0628');
+                bg.addColorStop(1, '#1a0a3a');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                // Parallax stars
+                bgStars.forEach(s => {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${s.brightness})`;
+                    ctx.fillRect(s.x, s.y, s.s, s.s);
+                });
+
+                // Meteors
+                meteors.forEach(m => {
+                    ctx.save();
+                    ctx.translate(m.x, m.y);
+                    ctx.rotate(m.rot);
+                    // Glow
+                    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, m.r * 1.5);
+                    glow.addColorStop(0, 'rgba(224, 74, 96, 0.3)');
+                    glow.addColorStop(1, 'rgba(224, 74, 96, 0)');
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(-m.r * 1.5, -m.r * 1.5, m.r * 3, m.r * 3);
+                    // Rocky body (irregular polygon)
+                    ctx.fillStyle = '#5a4840';
+                    ctx.beginPath();
+                    for (let i = 0; i < 7; i++) {
+                        const angle = (i / 7) * Math.PI * 2;
+                        const rr = m.r * (0.7 + ((i * 31 + Math.floor(m.r)) % 10) / 30);
+                        const px = Math.cos(angle) * rr;
+                        const py = Math.sin(angle) * rr;
+                        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    // Highlights
+                    ctx.fillStyle = '#7a685e';
+                    ctx.beginPath();
+                    ctx.arc(-m.r * 0.2, -m.r * 0.3, m.r * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                // Star collectibles
+                stars.forEach(s => {
+                    const glow = 0.5 + Math.sin(s.pulse) * 0.3;
+                    ctx.fillStyle = `rgba(224, 191, 79, ${glow})`;
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 72 - 90) * Math.PI / 180;
+                        const outerR = 8, innerR = 3.5;
+                        ctx.lineTo(s.x + Math.cos(angle) * outerR, s.y + Math.sin(angle) * outerR);
+                        const innerAngle = ((i * 72) + 36 - 90) * Math.PI / 180;
+                        ctx.lineTo(s.x + Math.cos(innerAngle) * innerR, s.y + Math.sin(innerAngle) * innerR);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                });
+
+                // Particles
+                particles.forEach(p => {
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+                });
+                ctx.globalAlpha = 1;
+
+                // Ship
+                if (!gameOver) drawShip(shipX, shipY);
+
+                // Score HUD
+                ctx.fillStyle = 'rgba(245, 239, 224, 0.5)';
+                ctx.font = '600 14px Space Grotesk, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('SCORE: ' + score, 12, 24);
+                ctx.textAlign = 'right';
+                ctx.fillText('SPEED: ×' + speed.toFixed(1), W - 12, 24);
+
+                // Game over overlay
+                if (gameOver) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.fillStyle = '#f5efe0';
+                    ctx.font = '600 26px Space Grotesk, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('DESTROYED', W / 2, H / 2 - 20);
+                    ctx.font = '400 15px Space Grotesk, sans-serif';
+                    ctx.fillText('Score: ' + score + '  •  Best: ' + meteorBestScore, W / 2, H / 2 + 14);
+                    ctx.font = '400 13px Space Grotesk, sans-serif';
+                    ctx.fillStyle = 'rgba(245,239,224,0.5)';
+                    ctx.fillText('Tap "New run" to try again', W / 2, H / 2 + 42);
+                }
+            }
+
+            function loop() {
+                if (gameOver) { draw(); return; }
+                update();
+                draw();
+                animFrame = requestAnimationFrame(loop);
+            }
+
+            // Keyboard controls
+            window.addEventListener('keydown', (e) => {
+                if (activeGame !== 'meteor') return;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { leftDown = true; e.preventDefault(); }
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { rightDown = true; e.preventDefault(); }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') leftDown = false;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') rightDown = false;
+            });
+
+            // Touch controls
+            document.getElementById('mt-left').addEventListener('mousedown', () => leftDown = true);
+            document.getElementById('mt-left').addEventListener('mouseup', () => leftDown = false);
+            document.getElementById('mt-left').addEventListener('mouseleave', () => leftDown = false);
+            document.getElementById('mt-left').addEventListener('touchstart', (e) => { e.preventDefault(); leftDown = true; });
+            document.getElementById('mt-left').addEventListener('touchend', () => leftDown = false);
+            document.getElementById('mt-right').addEventListener('mousedown', () => rightDown = true);
+            document.getElementById('mt-right').addEventListener('mouseup', () => rightDown = false);
+            document.getElementById('mt-right').addEventListener('mouseleave', () => rightDown = false);
+            document.getElementById('mt-right').addEventListener('touchstart', (e) => { e.preventDefault(); rightDown = true; });
+            document.getElementById('mt-right').addEventListener('touchend', () => rightDown = false);
+
+            // Canvas touch (swipe left/right)
+            let touchStartX = null;
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                touchStartX = e.touches[0].clientX;
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (touchStartX === null) return;
+                const diff = e.touches[0].clientX - touchStartX;
+                leftDown = diff < -10;
+                rightDown = diff > 10;
+            });
+            canvas.addEventListener('touchend', () => {
+                touchStartX = null;
+                leftDown = false;
+                rightDown = false;
+            });
+
+            resetBtn.addEventListener('click', reset);
+            reset();
+        }
+
+        /* ============================================================
+           DICE DUEL (vs House)
+           ============================================================ */
+        let diceduelStarted = false;
+        function initDiceDuel() {
+            diceduelStarted = true;
+            const playerScoreEl = document.getElementById('dd-player-score');
+            const houseScoreEl = document.getElementById('dd-house-score');
+            const winsEl = document.getElementById('dd-wins');
+            const barPlayerEl = document.getElementById('dd-bar-player');
+            const barHouseEl = document.getElementById('dd-bar-house');
+            const die1El = document.getElementById('dd-die1');
+            const die2El = document.getElementById('dd-die2');
+            const turnTotalEl = document.getElementById('dd-turn-total');
+            const rollBtn = document.getElementById('dd-roll');
+            const bankBtn = document.getElementById('dd-bank');
+            const resetBtnDD = document.getElementById('dd-reset');
+            const logEl = document.getElementById('dd-log');
+            const msgEl = document.getElementById('dd-msg');
+
+            const GOAL = 100;
+            const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            let playerTotal, houseTotal, turnTotal, rollCount, isPlayerTurn, ddGameOver, ddWins, rolling;
+
+            function log(text) {
+                const line = document.createElement('div');
+                line.textContent = text;
+                logEl.prepend(line);
+                if (logEl.children.length > 20) logEl.lastChild.remove();
+            }
+
+            function updateBar() {
+                barPlayerEl.style.width = Math.min(playerTotal, GOAL) + '%';
+                barHouseEl.style.width = Math.min(houseTotal, GOAL) + '%';
+            }
+
+            function updateUI() {
+                playerScoreEl.textContent = playerTotal;
+                houseScoreEl.textContent = houseTotal;
+                updateBar();
+            }
+
+            function showDice(d1, d2) {
+                die1El.textContent = DICE_FACES[d1 - 1];
+                die2El.textContent = DICE_FACES[d2 - 1];
+                die1El.classList.remove('bust', 'rolling');
+                die2El.classList.remove('bust', 'rolling');
+                if (d1 === 1) die1El.classList.add('bust');
+                if (d2 === 1) die2El.classList.add('bust');
+            }
+
+            function animateRoll(callback) {
+                rolling = true;
+                rollBtn.disabled = true;
+                bankBtn.disabled = true;
+                die1El.classList.add('rolling');
+                die2El.classList.add('rolling');
+                let ticks = 0;
+                const intv = setInterval(() => {
+                    die1El.textContent = DICE_FACES[Math.floor(Math.random() * 6)];
+                    die2El.textContent = DICE_FACES[Math.floor(Math.random() * 6)];
+                    ticks++;
+                    if (ticks >= 8) {
+                        clearInterval(intv);
+                        rolling = false;
+                        callback();
+                    }
+                }, 70);
+            }
+
+            function playerRoll() {
+                if (ddGameOver || !isPlayerTurn || rolling) return;
+                animateRoll(() => {
+                    const d1 = Math.floor(Math.random() * 6) + 1;
+                    const d2 = Math.floor(Math.random() * 6) + 1;
+                    showDice(d1, d2);
+                    rollCount++;
+
+                    if (d1 === 1 && d2 === 1) {
+                        // Snake eyes — lose ALL banked points too
+                        log('💀 Snake eyes! You lose ALL points!');
+                        playerTotal = 0;
+                        turnTotal = 0;
+                        updateUI();
+                        turnTotalEl.textContent = 'Snake eyes! Turn lost.';
+                        msgEl.textContent = '';
+                        setTimeout(() => endPlayerTurn(), 1200);
+                    } else if (d1 === 1 || d2 === 1) {
+                        // Rolled a 1 — lose turn total
+                        log('💥 Rolled a 1! Lost ' + turnTotal + ' turn points.');
+                        turnTotal = 0;
+                        turnTotalEl.textContent = 'Bust! Lost your turn points.';
+                        msgEl.textContent = '';
+                        setTimeout(() => endPlayerTurn(), 1200);
+                    } else {
+                        const sum = d1 + d2;
+                        turnTotal += sum;
+                        log('🎲 You rolled ' + d1 + '+' + d2 + ' = ' + sum + ' (turn: ' + turnTotal + ')');
+                        turnTotalEl.textContent = 'Turn total: ' + turnTotal + ' (+' + sum + ')';
+                        if (playerTotal + turnTotal >= GOAL) {
+                            playerBank();
+                        } else {
+                            rollBtn.disabled = false;
+                            bankBtn.disabled = false;
+                            msgEl.textContent = 'Roll again or bank ' + turnTotal + ' points?';
+                        }
+                    }
+                });
+            }
+
+            function playerBank() {
+                if (ddGameOver || !isPlayerTurn || rolling) return;
+                playerTotal += turnTotal;
+                log('💰 You banked ' + turnTotal + ' points! Total: ' + playerTotal);
+                turnTotal = 0;
+                updateUI();
+                if (playerTotal >= GOAL) {
+                    endGame(true);
+                    return;
+                }
+                turnTotalEl.textContent = 'Banked! House\'s turn...';
+                msgEl.textContent = '';
+                setTimeout(() => endPlayerTurn(), 800);
+            }
+
+            function endPlayerTurn() {
+                isPlayerTurn = false;
+                rollBtn.disabled = true;
+                bankBtn.disabled = true;
+                turnTotal = 0;
+                setTimeout(houseTurn, 600);
+            }
+
+            function houseTurn() {
+                if (ddGameOver) return;
+                turnTotalEl.textContent = '🏠 House is rolling...';
+                msgEl.textContent = '';
+
+                function houseRollStep() {
+                    animateRoll(() => {
+                        const d1 = Math.floor(Math.random() * 6) + 1;
+                        const d2 = Math.floor(Math.random() * 6) + 1;
+                        showDice(d1, d2);
+
+                        if (d1 === 1 && d2 === 1) {
+                            log('🏠 House got snake eyes! Loses all points!');
+                            houseTotal = 0;
+                            turnTotal = 0;
+                            updateUI();
+                            turnTotalEl.textContent = 'House got snake eyes!';
+                            setTimeout(() => startPlayerTurn(), 1200);
+                        } else if (d1 === 1 || d2 === 1) {
+                            log('🏠 House rolled a 1! Lost ' + turnTotal + ' turn points.');
+                            turnTotal = 0;
+                            turnTotalEl.textContent = 'House busted!';
+                            setTimeout(() => startPlayerTurn(), 1200);
+                        } else {
+                            const sum = d1 + d2;
+                            turnTotal += sum;
+                            log('🏠 House rolled ' + d1 + '+' + d2 + ' = ' + sum + ' (turn: ' + turnTotal + ')');
+                            turnTotalEl.textContent = '🏠 House turn: ' + turnTotal;
+
+                            if (houseTotal + turnTotal >= GOAL) {
+                                houseTotal += turnTotal;
+                                turnTotal = 0;
+                                updateUI();
+                                endGame(false);
+                                return;
+                            }
+
+                            // AI strategy: smarter banking
+                            const totalAfterBank = houseTotal + turnTotal;
+                            const deficit = playerTotal - houseTotal;
+                            let shouldBank = false;
+
+                            if (turnTotal >= 20) shouldBank = true;
+                            if (turnTotal >= 15 && houseTotal > playerTotal) shouldBank = true;
+                            if (deficit > 20 && turnTotal < 15) shouldBank = false;
+                            if (totalAfterBank >= GOAL) shouldBank = true;
+                            // Desperation: if far behind, keep rolling
+                            if (deficit > 30 && turnTotal < 25) shouldBank = false;
+
+                            if (shouldBank) {
+                                houseTotal += turnTotal;
+                                log('🏠 House banks ' + turnTotal + '! Total: ' + houseTotal);
+                                turnTotal = 0;
+                                updateUI();
+                                turnTotalEl.textContent = 'House banked. Your turn!';
+                                setTimeout(() => startPlayerTurn(), 1000);
+                            } else {
+                                setTimeout(houseRollStep, 800);
+                            }
+                        }
+                    });
+                }
+
+                houseRollStep();
+            }
+
+            function startPlayerTurn() {
+                if (ddGameOver) return;
+                isPlayerTurn = true;
+                turnTotal = 0;
+                rollBtn.disabled = false;
+                bankBtn.disabled = true;
+                turnTotalEl.textContent = 'Your turn — roll the dice!';
+                msgEl.textContent = '';
+            }
+
+            function endGame(playerWon) {
+                ddGameOver = true;
+                rollBtn.disabled = true;
+                bankBtn.disabled = true;
+                if (playerWon) {
+                    ddWins++;
+                    winsEl.textContent = ddWins;
+                    turnTotalEl.textContent = '🎉 You win! ' + playerTotal + ' to ' + houseTotal;
+                    msgEl.textContent = 'Congratulations!';
+                    log('🏆 YOU WIN! ' + playerTotal + ' to ' + houseTotal);
+                } else {
+                    turnTotalEl.textContent = '😔 House wins! ' + houseTotal + ' to ' + playerTotal;
+                    msgEl.textContent = 'Better luck next time.';
+                    log('❌ House wins. ' + houseTotal + ' to ' + playerTotal);
+                }
+                recordRound(playerWon);
+            }
+
+            function reset() {
+                playerTotal = 0;
+                houseTotal = 0;
+                turnTotal = 0;
+                rollCount = 0;
+                isPlayerTurn = true;
+                ddGameOver = false;
+                rolling = false;
+                ddWins = ddWins || 0;
+                logEl.innerHTML = '';
+                die1El.textContent = '–';
+                die2El.textContent = '–';
+                die1El.className = 'dd-die';
+                die2El.className = 'dd-die';
+                rollBtn.disabled = false;
+                bankBtn.disabled = true;
+                updateUI();
+                turnTotalEl.textContent = 'Roll to begin!';
+                msgEl.textContent = 'First to ' + GOAL + ' wins. Good luck!';
+                log('— New game started —');
+            }
+
+            rollBtn.addEventListener('click', playerRoll);
+            bankBtn.addEventListener('click', playerBank);
+            resetBtnDD.addEventListener('click', reset);
             reset();
         }
     </script>

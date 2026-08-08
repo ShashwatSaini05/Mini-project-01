@@ -1,5 +1,5 @@
 <div align="center">
- 
+
 # 🎮 Game Night
 
 ### **Fun Browser Games • One Place • Pure HTML & CSS**
